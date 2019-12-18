@@ -5,9 +5,9 @@
 
 #include <QMainWindow>
 #include <QDebug>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkAccessManager>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
