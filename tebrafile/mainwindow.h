@@ -29,10 +29,12 @@ public:
     ~MainWindow();
     void getFileList();
 
+signals:
+    void done();
 
 public slots:
     void addToList(const QUrlInfo& file);
-
+    void ftpDone(bool error);
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;
@@ -44,6 +46,8 @@ private:
     int ftpPort;
     QString username;
     QString password;
+
+    QUrl url;
 
     QNetworkReply* downloadFileListReply;
     QNetworkReply* uploadFileListReply;
