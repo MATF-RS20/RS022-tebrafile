@@ -16,6 +16,43 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QLabel" name="label2">
+      <property name="text">
+       <string>ServerName:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="hl3">
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QLineEdit" name="serverNameField">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="userNameField"/>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="passwdField"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="connectButton">
+        <property name="text">
+         <string>Connect</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QLabel" name="label">
       <property name="text">
        <string>Upload file:</string>
@@ -23,12 +60,16 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="hl1">
       <item>
-       <widget class="QLineEdit" name="uploadFileInput"/>
+       <widget class="QLineEdit" name="uploadFileInput">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="openButton">
         <property name="text">
          <string>Open</string>
         </property>
@@ -58,7 +99,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="hl2">
       <item>
        <widget class="QLineEdit" name="donwloadPath"/>
       </item>
@@ -114,4 +155,3 @@
  <resources/>
  <connections/>
 </ui>
-

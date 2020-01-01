@@ -35,6 +35,9 @@ signals:
 public slots:
     void addToList(const QUrlInfo& file);
     void ftpDone(bool error);
+private slots:
+    void on_connectButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;
@@ -58,5 +61,8 @@ private:
     QStringList fileList;
     QString uploadFileName;
     QString downloadFIlename;
+
+
+    void connectToServer();
 };
 #endif // MAINWINDOW_H
