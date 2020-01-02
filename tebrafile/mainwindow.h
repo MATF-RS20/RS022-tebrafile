@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "inputDialog.h"
+
 #include <iostream>
 
 #include <QMainWindow>
@@ -34,8 +36,12 @@ signals:
 public slots:
     void addToList(const QUrlInfo& file);
     void ftpDone(bool error);
+    void login(InputDialog* diag);
+
 private slots:
     void on_connectButton_clicked();
+
+    void on_disconnectButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -46,8 +52,8 @@ private:
 
     QString ftpAdrress;
     int ftpPort;
-    QString username = "";
-    QString password = "";
+    QString username = "default1";
+    QString password = "DEFAULT1";
 
     QUrl url;
 

@@ -13,13 +13,23 @@
 #include <QDebug>
 
 
+#include <iostream>
+
 class InputDialog : public QDialog {
     Q_OBJECT
 public:
-    //explicit InputDialog(QWidget* parent = nullptr, QString label = QString());
     template<typename... Args>
     InputDialog(QWidget* parent = nullptr, Args... labels);
-    QStringList getStrings(bool* ok = nullptr);
+    static QStringList getStrings(InputDialog* diag, bool* ok = nullptr);
+
+public slots:
+    void ok_clicked()
+    {
+        emit credentialsCaptured(this);
+    }
+
+signals:
+    void credentialsCaptured(InputDialog* diag);
 private:
     QList<QLineEdit*> fields;
     QStringList labelNames;
@@ -27,8 +37,11 @@ private:
 
     void addLabelsAndLines(QString& label)
     {
+
         QLabel* tLabel = new QLabel(label);
         QLineEdit* tLine = new QLineEdit(this);
+        if (label.compare(QString("password")) == 0)
+            tLine->setEchoMode(QLineEdit::Password);
         lyMain->addRow(tLabel, tLine);
         fields << tLine;
     }
@@ -56,9 +69,10 @@ inline InputDialog::InputDialog(QWidget* parent, Args... labels)
                     Qt::Horizontal, this );
     lyMain->addWidget(buttonBox);
 
-    bool conn = QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, &InputDialog::accept);
+    bool conn = QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, &InputDialog::ok_clicked);
     Q_ASSERT(conn);
-
+    conn = QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, &InputDialog::accept);
+    Q_ASSERT(conn);
     conn = QObject::connect(buttonBox, &QDialogButtonBox::rejected, this, &InputDialog::reject);
     Q_ASSERT(conn);
 

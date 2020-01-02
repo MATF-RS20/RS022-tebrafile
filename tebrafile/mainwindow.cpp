@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "inputDialog.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -40,8 +39,17 @@ void MainWindow::addToList(const QUrlInfo& file)
 
 void MainWindow::on_connectButton_clicked()
 {
+
     ftpAdrress = "ftp://" + ui->serverNameField->text();
     connectToServer();
+}
+
+void MainWindow::login(InputDialog* diag)
+{
+    QStringList credentials = InputDialog::getStrings(diag);
+    username = credentials.at(0);
+    password = credentials.at(1);
+    ftpClient->login(username, password);
 }
 
 
@@ -55,13 +63,11 @@ void MainWindow::connectToServer()
                 std::cout << "Unknown error: " << QFtp::UnknownError << std::endl;
                 std::cout << "NoError: " << QFtp::NoError << std::endl;
                 std::cout << "FTP MY ERROR: " << ftpClient->error() << std::endl;
-                InputDialog* loginDialog = new InputDialog(this, QString("username"), QString("password"));
-                QStringList credentials = loginDialog->getStrings();
-                username = credentials.takeAt(0);
-                password = credentials.takeAt(1);
-                std::cout << username.toUtf8().data() << " " << password.toUtf8().data() << std::endl;
-                //ftpClient->login(username, password);
-
+                InputDialog* diag = new InputDialog(this,
+                                                    QString("username"),
+                                                    QString("password"));
+                QObject::connect(diag, &InputDialog::credentialsCaptured, this, &MainWindow::login);
+                diag->exec();
             } else {
                 //std::cerr << ftpClient->error() << std::endl;
                 QMessageBox errBox;
@@ -69,7 +75,7 @@ void MainWindow::connectToServer()
                 errBox.setText(ftpClient->errorString());
                 errBox.setIcon(QMessageBox::Critical);
                 errBox.exec();
-                ftpClient->disconnect();
+                ftpClient->close();
             }
 
         } else
@@ -78,4 +84,9 @@ void MainWindow::connectToServer()
         QObject::connect(ftpClient, &QFtp::listInfo, this, &MainWindow::addToList);
         QObject::connect(ftpClient, &QFtp::done, this, &MainWindow::ftpDone);
         ftpClient->list("./");
+}
+
+void MainWindow::on_disconnectButton_clicked()
+{
+    ftpClient->close();
 }
