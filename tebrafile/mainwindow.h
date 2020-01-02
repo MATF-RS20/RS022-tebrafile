@@ -46,6 +46,8 @@ private slots:
 
     void on_openButton_clicked();
 
+    void on_uploadButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;

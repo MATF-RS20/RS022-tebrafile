@@ -147,3 +147,11 @@ void MainWindow::on_openButton_clicked()
                 "/");
     ui->uploadFileInput->setText(filenames.join(';'));
 }
+
+void MainWindow::on_uploadButton_clicked()
+{
+    if (ui->uploadFileInput->text().trimmed().length() == 0)
+        QMessageBox::critical(this, "Alert", "Files did not selected.");
+
+    const auto listOfFiles = ui->uploadFileInput->text().split(";");
+}
