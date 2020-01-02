@@ -13,7 +13,6 @@
 #include <QFileDialog>
 #include <QListWidgetItem>
 #include <QMessageBox>
-
 #include <QFtp>
 
 QT_BEGIN_NAMESPACE
@@ -47,8 +46,8 @@ private:
 
     QString ftpAdrress;
     int ftpPort;
-    QString username;
-    QString password;
+    QString username = "";
+    QString password = "";
 
     QUrl url;
 

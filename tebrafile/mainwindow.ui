@@ -38,12 +38,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="userNameField"/>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="passwdField"/>
-      </item>
-      <item>
        <widget class="QPushButton" name="connectButton">
         <property name="text">
          <string>Connect</string>
