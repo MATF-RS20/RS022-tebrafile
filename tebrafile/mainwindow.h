@@ -44,6 +44,8 @@ private slots:
     void on_connectButton_clicked();
     void on_disconnectButton_clicked();
 
+    void on_openButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;

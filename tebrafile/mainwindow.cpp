@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <iostream>
+#include <QTreeView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -121,3 +122,28 @@ void MainWindow::on_disconnectButton_clicked()
 }
 
 
+
+void MainWindow::on_openButton_clicked()
+{
+
+    //Poruka za Jola, ovako nesto moze
+//    QFileDialog fileDialog;
+//    fileDialog.setFileMode(QFileDialog::DirectoryOnly);
+//    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+//    QListView *l = fileDialog.findChild<QListView*>("listView");
+//    if (l) {
+//         l->setSelectionMode(QAbstractItemView::MultiSelection);
+//     }
+//    QTreeView *t = fileDialog.findChild<QTreeView*>();
+//     if (t) {
+//       t->setSelectionMode(QAbstractItemView::MultiSelection);
+//    }
+//    int node_m = fileDialog.exec();
+//    const auto filenames = fileDialog.selectedFiles();
+
+    const auto filenames = QFileDialog::getOpenFileNames(
+                this,
+                "Select files",
+                "/");
+    ui->uploadFileInput->setText(filenames.join(';'));
+}
