@@ -121,7 +121,13 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="fileList"/>
+     <widget class="QTreeWidget" name="treeWidget">
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
     </item>
     <item>
      <widget class="QProgressBar" name="downloadProgress">
