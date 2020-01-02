@@ -11,45 +11,12 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-void MainWindow::ftpDone(bool error)
-{
-    if (error) {
-        std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
-        ui->loginMsg->setText(ftpClient->errorString());
-        ui->loginMsg->setStyleSheet("QLabel {color : red}");
-        ftpClient->disconnect();
-    }
-}
-
-
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-
-void MainWindow::addToList(const QUrlInfo& file)
-{
-    fileList.push_back(file.name());
-    qDebug() << file.name();
-}
-
-void MainWindow::on_connectButton_clicked()
-{
-
-    ftpAdrress = ui->serverNameField->text();
-    connectToServer();
-}
-
-void MainWindow::login(InputDialog* diag)
-{
-    QStringList credentials = InputDialog::getStrings(diag);
-    username = credentials.at(0);
-    password = credentials.at(1);
-    ftpClient->login(username, password);
-    QObject::connect(ftpClient, &QFtp::stateChanged, this, &MainWindow::afterLogin);
-}
 
 void MainWindow::connectToServer()
 {
@@ -64,11 +31,34 @@ void MainWindow::connectToServer()
        QObject::connect(ftpClient, &QFtp::stateChanged, this, &MainWindow::showLoginDialog);
 }
 
-void MainWindow::on_disconnectButton_clicked()
+
+
+
+
+
+/***
+ *
+ * IMPLEMENTACIJE SLOTOVA DOLE
+ *
+ ***/
+
+
+void MainWindow::addToList(const QUrlInfo& file)
 {
-    ftpClient->close();
-    ftpClient->abort();
-    ui->loginMsg->setText("You are disconnected");
+    fileList.push_back(file.name());
+    qDebug() << file.name();
+}
+
+
+
+void MainWindow::ftpDone(bool error)
+{
+    if (error) {
+        std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
+        ui->loginMsg->setText(ftpClient->errorString());
+        ui->loginMsg->setStyleSheet("QLabel {color : red}");
+        ftpClient->disconnect();
+    }
 }
 
 void MainWindow::showLoginDialog(int state)
@@ -92,6 +82,25 @@ void MainWindow::showLoginDialog(int state)
 
 }
 
+void MainWindow::login(InputDialog* diag)
+{
+    QStringList credentials = InputDialog::getStrings(diag);
+    username = credentials.at(0);
+    password = credentials.at(1);
+    ftpClient->login(username, password);
+    QObject::connect(ftpClient, &QFtp::stateChanged, this, &MainWindow::afterLogin);
+}
+
+
+
+
+void MainWindow::on_connectButton_clicked()
+{
+
+    ftpAdrress = ui->serverNameField->text();
+    connectToServer();
+}
+
 void MainWindow::afterLogin(int state)
 {
     if (state == QFtp::LoggedIn and ftpClient->currentCommand() == QFtp::Login) {
@@ -100,3 +109,15 @@ void MainWindow::afterLogin(int state)
         ui->loginMsg->clear();
     }
 }
+
+
+
+
+void MainWindow::on_disconnectButton_clicked()
+{
+    ftpClient->close();
+    ftpClient->abort();
+    ui->loginMsg->setText("You are disconnected");
+}
+
+
