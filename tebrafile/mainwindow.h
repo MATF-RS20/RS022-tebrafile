@@ -16,7 +16,6 @@
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QFtp>
-#include <QHash>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -40,9 +39,6 @@ public slots:
     void showLoginDialog(int state);
     void login(InputDialog* diag);
     void afterLogin(int state);
-    void listDone(bool error);
-    void listFiles(const QString& fileName);
-    void fileSystem(QHash<QString, QUrlInfo> files);
 
 private slots:
     void on_connectButton_clicked();
@@ -68,8 +64,7 @@ private:
     QNetworkReply* downloadFileReply;
     QNetworkReply* uploadFileReply;
 
-    QHash<QString, QUrlInfo> fileList;
-    QString currentFile;
+    QStringList fileList;
     QString uploadFileName;
     QString downloadFIlename;
 
