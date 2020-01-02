@@ -54,6 +54,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QLabel" name="loginMsg">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QLabel" name="label">
       <property name="text">
        <string>Upload file:</string>

@@ -36,11 +36,12 @@ signals:
 public slots:
     void addToList(const QUrlInfo& file);
     void ftpDone(bool error);
+    void showLoginDialog(int state);
     void login(InputDialog* diag);
+    void afterLogin(int state);
 
 private slots:
     void on_connectButton_clicked();
-
     void on_disconnectButton_clicked();
 
 private:
