@@ -237,15 +237,16 @@ void MainWindow::on_uploadButton_clicked()
 
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         QMessageBox::critical(this, "Alert", "Files did not selected.");
-
-    const auto listOfFiles = ui->uploadFileInput->text().split(";");
-    foreach (const auto file, listOfFiles) {
-        const auto namesParts = file.split("/");
-        QFile readFile(file);
-        readFile.open(QIODevice::ReadOnly);
-        const QByteArray buffer = readFile.readAll();
-        ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
-        QObject::connect(ftpClient, &QFtp::dataTransferProgress,
-                         this, &MainWindow::progressBarSlot);
+    else {
+        const auto listOfFiles = ui->uploadFileInput->text().split(";");
+        foreach (const auto file, listOfFiles) {
+            const auto namesParts = file.split("/");
+            QFile readFile(file);
+            readFile.open(QIODevice::ReadOnly);
+            const QByteArray buffer = readFile.readAll();
+            ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+            QObject::connect(ftpClient, &QFtp::dataTransferProgress,
+                             this, &MainWindow::progressBarSlot);
+        }
     }
 }
