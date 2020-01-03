@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
                                     << "Last modified");
     QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
     fileList->clear();
+    isDir.clear();
     currentPath.clear();
 
     QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
@@ -82,6 +83,16 @@ void MainWindow::on_disconnectButton_clicked()
 {
     ftpClient->close();
     ftpClient->abort();
+
+    fileList->clear();
+    isDir.clear();
+    currentPath.clear();
+
+    QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
+    widgetItem->setText(0, "..");
+    fileList->addTopLevelItem(widgetItem);
+    fileList->setEnabled(false);
+
     ui->loginMsg->setText("You are disconnected");
 }
 
@@ -205,6 +216,8 @@ void MainWindow::listDone(bool error)
 void MainWindow::progressBarSlot(qint64 done, qint64 total)
 {
     ui->uploadProgressBar->setValue(100*done/total);
+    if(done == total)
+        fileList->setEnabled(true);
 }
 
 
@@ -220,6 +233,8 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
+    fileList->setEnabled(false);
+
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         QMessageBox::critical(this, "Alert", "Files did not selected.");
 
