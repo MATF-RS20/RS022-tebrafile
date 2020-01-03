@@ -71,7 +71,6 @@ void MainWindow::showLoginDialog(int state)
         QObject::connect(diag, &InputDialog::credentialsCaptured, this, &MainWindow::login);
         diag->exec();
     } else if (state == QFtp::Unconnected and ftpClient->currentCommand() != QFtp::Close){
-        std::cerr << "ELSE ERROR: " << ftpClient->error() << std::endl;
         QMessageBox errBox;
         errBox.setWindowTitle("Connection error");
         errBox.setText(ftpClient->errorString());
@@ -107,7 +106,6 @@ void MainWindow::afterLogin(int state)
     if (state == QFtp::LoggedIn and ftpClient->currentCommand() == QFtp::Login) {
         QObject::connect(ftpClient, &QFtp::listInfo, this, &MainWindow::addToList);
         ftpClient->list("./");
-        ftpClient->cd("upload");
         ui->loginMsg->clear();
     }
 }
@@ -126,29 +124,12 @@ void MainWindow::on_disconnectButton_clicked()
 void MainWindow::progressBarSlot(qint64 done, qint64 total)
 {
     ui->uploadProgressBar->setValue(100*done/total);
-    qDebug() << done << " " << total;
 }
 
 
 
 void MainWindow::on_openButton_clicked()
 {
-
-    //Poruka za Jola, ovako nesto moze
-//    QFileDialog fileDialog;
-//    fileDialog.setFileMode(QFileDialog::DirectoryOnly);
-//    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-//    QListView *l = fileDialog.findChild<QListView*>("listView");
-//    if (l) {
-//         l->setSelectionMode(QAbstractItemView::MultiSelection);
-//     }
-//    QTreeView *t = fileDialog.findChild<QTreeView*>();
-//     if (t) {
-//       t->setSelectionMode(QAbstractItemView::MultiSelection);
-//    }
-//    int node_m = fileDialog.exec();
-//    const auto filenames = fileDialog.selectedFiles();
-
     const auto filenames = QFileDialog::getOpenFileNames(
                 this,
                 "Select files",
