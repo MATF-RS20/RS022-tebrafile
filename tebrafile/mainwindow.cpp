@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <iostream>
+#include <QTreeView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -93,7 +94,6 @@ void MainWindow::showLoginDialog(int state)
         QObject::connect(diag, &InputDialog::credentialsCaptured, this, &MainWindow::login);
         diag->exec();
     } else if (state == QFtp::Unconnected and ftpClient->currentCommand() != QFtp::Close){
-        std::cerr << "ELSE ERROR: " << ftpClient->error() << std::endl;
         QMessageBox errBox;
         errBox.setWindowTitle("Connection error");
         errBox.setText(ftpClient->errorString());
@@ -199,5 +199,38 @@ void MainWindow::listDone(bool error)
 {
     if (error) {
         std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
+    }
+}
+
+void MainWindow::progressBarSlot(qint64 done, qint64 total)
+{
+    ui->uploadProgressBar->setValue(100*done/total);
+}
+
+
+
+void MainWindow::on_openButton_clicked()
+{
+    const auto filenames = QFileDialog::getOpenFileNames(
+                this,
+                "Select files",
+                "/");
+    ui->uploadFileInput->setText(filenames.join(';'));
+}
+
+void MainWindow::on_uploadButton_clicked()
+{
+    if (ui->uploadFileInput->text().trimmed().length() == 0)
+        QMessageBox::critical(this, "Alert", "Files did not selected.");
+
+    const auto listOfFiles = ui->uploadFileInput->text().split(";");
+    foreach (const auto file, listOfFiles) {
+        const auto namesParts = file.split("/");
+        QFile readFile(file);
+        readFile.open(QIODevice::ReadOnly);
+        const QByteArray buffer = readFile.readAll();
+        ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+        QObject::connect(ftpClient, &QFtp::dataTransferProgress,
+                         this, &MainWindow::progressBarSlot);
     }
 }

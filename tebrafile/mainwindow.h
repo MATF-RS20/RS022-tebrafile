@@ -19,6 +19,8 @@
 #include <QHash>
 #include <QTreeWidget>
 
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -45,10 +47,15 @@ public slots:
     void listFiles(const QString& fileName);
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);
     void leaveFolder();
+    void progressBarSlot(qint64 done, qint64 total);
 
 private slots:
     void on_connectButton_clicked();
     void on_disconnectButton_clicked();
+
+    void on_openButton_clicked();
+
+    void on_uploadButton_clicked();
 
 private:
     Ui::MainWindow *ui;

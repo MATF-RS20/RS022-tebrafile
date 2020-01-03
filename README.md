@@ -13,3 +13,11 @@ dodatne opcije.
 
 ## Korišćene biblioteke
 * QT5
+* QT4 ~ ftp modul
+
+## Instalacija :construction:
+>- Potrebno je preuzeti source code qt4-ftp modula sa [ove](https://github.com/qt/qtftp) adrese  
+>- Raspakovati u direktorijum gde se nalaze ostali QT moduli za verziju koju koristite.
+>- Pokrenuti u konzoli  ```cd PATH_DO_qtftp/```
+>- Izvršiti ```qmake -r``` i nakon toga ```make```
+>- Ako je sve uspešno završeno, projekat se kompilira pokreće kao i svaki drugi QT projekat.
