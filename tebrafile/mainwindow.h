@@ -16,6 +16,8 @@
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QFtp>
+#include <QHash>
+#include <QTreeWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -39,6 +41,10 @@ public slots:
     void showLoginDialog(int state);
     void login(InputDialog* diag);
     void afterLogin(int state);
+    void listDone(bool error);
+    void listFiles(const QString& fileName);
+    void cdToFolder(QTreeWidgetItem *widgetItem, int column);
+    void leaveFolder();
 
 private slots:
     void on_connectButton_clicked();
@@ -64,7 +70,10 @@ private:
     QNetworkReply* downloadFileReply;
     QNetworkReply* uploadFileReply;
 
-    QStringList fileList;
+
+    QTreeWidget *fileList;
+    QHash<QString, bool> isDir;
+    QString currentPath;
     QString uploadFileName;
     QString downloadFIlename;
 

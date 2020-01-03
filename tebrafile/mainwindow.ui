@@ -54,13 +54,6 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="loginMsg">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QLabel" name="label">
       <property name="text">
        <string>Upload file:</string>
@@ -68,14 +61,21 @@
      </widget>
     </item>
     <item>
+     <widget class="QLineEdit" name="uploadFileInput">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="loginMsg">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="hl1">
-      <item>
-       <widget class="QLineEdit" name="uploadFileInput">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QPushButton" name="openButton">
         <property name="text">
@@ -121,7 +121,13 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="fileList"/>
+     <widget class="QTreeWidget" name="treeWidget">
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
     </item>
     <item>
      <widget class="QProgressBar" name="downloadProgress">
