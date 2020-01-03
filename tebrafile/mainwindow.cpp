@@ -131,8 +131,10 @@ void MainWindow::addToList(const QUrlInfo& file)
     widgetItem->setText(3, file.group());
     widgetItem->setText(4, file.lastModified().toString("dd/mm/yyyy"));
 
-    //QPixmap pixmap(urlInfo.isDir() ? ":/images/dir.png" : ":/images/file.png");
-    //item->setIcon(0, pixmap);
+    QIcon* folderIcon = new QIcon("../icons/directory.png");
+    QIcon* fileIcon = new QIcon("../icons/file.png");
+    QIcon* icon(file.isDir() ? folderIcon : fileIcon);
+    widgetItem->setIcon(0, *icon);
 
     isDir.insert(file.name(), file.isDir());
 
