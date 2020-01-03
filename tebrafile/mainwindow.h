@@ -17,6 +17,8 @@
 #include <QMessageBox>
 #include <QFtp>
 
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -39,6 +41,7 @@ public slots:
     void showLoginDialog(int state);
     void login(InputDialog* diag);
     void afterLogin(int state);
+    void progressBarSlot(qint64 done, qint64 total);
 
 private slots:
     void on_connectButton_clicked();

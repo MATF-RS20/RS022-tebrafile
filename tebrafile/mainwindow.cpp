@@ -107,6 +107,7 @@ void MainWindow::afterLogin(int state)
     if (state == QFtp::LoggedIn and ftpClient->currentCommand() == QFtp::Login) {
         QObject::connect(ftpClient, &QFtp::listInfo, this, &MainWindow::addToList);
         ftpClient->list("./");
+        ftpClient->cd("upload");
         ui->loginMsg->clear();
     }
 }
@@ -119,6 +120,13 @@ void MainWindow::on_disconnectButton_clicked()
     ftpClient->close();
     ftpClient->abort();
     ui->loginMsg->setText("You are disconnected");
+}
+
+
+void MainWindow::progressBarSlot(qint64 done, qint64 total)
+{
+    ui->uploadProgressBar->setValue(100*done/total);
+    qDebug() << done << " " << total;
 }
 
 
@@ -154,4 +162,13 @@ void MainWindow::on_uploadButton_clicked()
         QMessageBox::critical(this, "Alert", "Files did not selected.");
 
     const auto listOfFiles = ui->uploadFileInput->text().split(";");
+    foreach (const auto file, listOfFiles) {
+        const auto namesParts = file.split("/");
+        QFile readFile(file);
+        readFile.open(QIODevice::ReadOnly);
+        const QByteArray buffer = readFile.readAll();
+        ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+        QObject::connect(ftpClient, &QFtp::dataTransferProgress,
+                         this, &MainWindow::progressBarSlot);
+    }
 }
