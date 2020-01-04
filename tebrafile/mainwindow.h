@@ -43,6 +43,8 @@ public slots:
     void showLoginDialog(int state);
     void login(InputDialog* diag);
     void afterLogin(int state);
+    void initTreeWidget();
+    void restartTreeWidget();
     void listDone(bool error);
     void listFiles(const QString& fileName);
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);

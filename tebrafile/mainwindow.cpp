@@ -10,6 +10,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     fileList = ui->treeWidget;
+    initTreeWidget();
+    currentPath.clear();
+
+    manager = new QNetworkAccessManager(this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::initTreeWidget()
+{
     fileList->setEnabled(false);
     fileList->setRootIsDecorated(true);
     fileList->header()->setStretchLastSection(true);
@@ -20,19 +33,21 @@ MainWindow::MainWindow(QWidget *parent)
                                     << "Owner"
                                     << "Group"
                                     << "Last modified");
+    restartTreeWidget();
     QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
+}
+
+void MainWindow::restartTreeWidget()
+{
     fileList->clear();
     isDir.clear();
-    currentPath.clear();
 
     QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
     widgetItem->setText(0, "..");
-    widgetItem->setDisabled(true);
     fileList->addTopLevelItem(widgetItem);
 
-    manager = new QNetworkAccessManager(this);
+    widgetItem->setDisabled(true);
 }
-
 
 void MainWindow::ftpDone(bool error)
 {
@@ -40,13 +55,6 @@ void MainWindow::ftpDone(bool error)
         std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
         ftpClient->disconnect();
     }
-}
-
-
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -82,15 +90,8 @@ void MainWindow::on_disconnectButton_clicked()
     ftpClient->close();
     ftpClient->abort();
 
-    fileList->clear();
-    isDir.clear();
     currentPath.clear();
-
-    QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-    widgetItem->setText(0, "..");
-    fileList->addTopLevelItem(widgetItem);
-    fileList->setEnabled(false);
-
+    restartTreeWidget();
 }
 
 void MainWindow::showLoginDialog(int state)
@@ -166,14 +167,7 @@ void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
             currentPath += '/';
             currentPath += name;
 
-            std::cout << currentPath.toStdString() << std::endl;
-
-            fileList->clear();
-            isDir.clear();
-
-            QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-            widgetItem->setText(0, "..");
-            fileList->addTopLevelItem(widgetItem);
+            restartTreeWidget();
 
             ftpClient->cd(name);
             ftpClient->list();
@@ -183,19 +177,11 @@ void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
 
 void MainWindow::leaveFolder()
 {
-      fileList->clear();
-      isDir.clear();
-
-      QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-      widgetItem->setText(0, "..");
-      fileList->addTopLevelItem(widgetItem);
-
+      restartTreeWidget();
       currentPath = currentPath.left(currentPath.lastIndexOf('/'));
-      std::cout << currentPath.toStdString() << std::endl;
       if(currentPath.isEmpty()) {
           currentPath = "~";
           ftpClient->cd("~");
-          fileList->topLevelItem(0)->setDisabled(true);
       } else {
           ftpClient->cd(currentPath);
       }
@@ -253,7 +239,6 @@ void MainWindow::on_uploadButton_clicked()
 
 void MainWindow::progressBarSlot(qint64 done, qint64 total)
 {
-
     ui->uploadProgressBar->setValue(100*done/total);
     if(done == total)
         fileList->setEnabled(true);
