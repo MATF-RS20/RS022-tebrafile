@@ -308,7 +308,7 @@ void MainWindow::on_treeWidget_clicked()
     QStringList filenamesQ;
 
     //ruzno ali radi
-    //FIXME: sa refactorisanjem i std::transform
+    // fix sa refactorisanjem i std::transform
     QString temp;
     for(auto filename : filenames)
     {
@@ -351,7 +351,4 @@ void MainWindow::pwdHandler(int replyCode, const QString& detail)
     qDebug() << "-----------------------";
 
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> c4314dd60cbbc3b6a1b7fc03d0025f54bb69841e
