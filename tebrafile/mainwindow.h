@@ -45,12 +45,19 @@ public slots:
     void showLoginDialog(int state);
     void login(InputDialog* diag);
     void afterLogin(int state);
+    void initTreeWidget();
+    void restartTreeWidget();
     void listDone(bool error);
     void listFiles(const QString& fileName);
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);
     void leaveFolder();
-    void uploadProgressBarSlot(qint64 done, qint64 total);
+
     void downloadProgressBarSlot(qint64 done, qint64 total);
+
+    void progressBarSlot(qint64 done, qint64 total);
+    void uploadFinishHandler(int id, bool error);
+    void pwdHandler(int replyCode, const QString& detail);
+
 
 private slots:
     void on_connectButton_clicked();
@@ -90,6 +97,7 @@ private:
     QString uploadFileName;
     QString downloadFilename;
 
+    bool logged = false;
 
     void connectToServer();
 };

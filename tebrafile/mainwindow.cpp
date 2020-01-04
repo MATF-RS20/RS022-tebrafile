@@ -10,6 +10,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     fileList = ui->treeWidget;
+    initTreeWidget();
+    currentPath.clear();
+
+    manager = new QNetworkAccessManager(this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::initTreeWidget()
+{
     fileList->setEnabled(false);
     fileList->setRootIsDecorated(true);
     fileList->header()->setStretchLastSection(true);
@@ -20,38 +33,35 @@ MainWindow::MainWindow(QWidget *parent)
                                     << "Owner"
                                     << "Group"
                                     << "Last modified");
+    restartTreeWidget();
     QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
+}
+
+void MainWindow::restartTreeWidget()
+{
     fileList->clear();
     isDir.clear();
-    currentPath.clear();
 
     QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
     widgetItem->setText(0, "..");
-    widgetItem->setDisabled(true);
     fileList->addTopLevelItem(widgetItem);
+
 
     // ctrl+click for multi-select
     fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     manager = new QNetworkAccessManager(this);
-}
 
+    widgetItem->setDisabled(true);
+
+}
 
 void MainWindow::ftpDone(bool error)
 {
     if (error) {
         std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
-        ui->loginMsg->setText(ftpClient->errorString());
-        ui->loginMsg->setStyleSheet("QLabel {color : red}");
         ftpClient->disconnect();
     }
-}
-
-
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -87,16 +97,8 @@ void MainWindow::on_disconnectButton_clicked()
     ftpClient->close();
     ftpClient->abort();
 
-    fileList->clear();
-    isDir.clear();
     currentPath.clear();
-
-    QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-    widgetItem->setText(0, "..");
-    fileList->addTopLevelItem(widgetItem);
-    fileList->setEnabled(false);
-
-    ui->loginMsg->setText("You are disconnected");
+    restartTreeWidget();
 }
 
 void MainWindow::showLoginDialog(int state)
@@ -125,7 +127,7 @@ void MainWindow::afterLogin(int state)
     currentPath = QString("~");
     if (state == QFtp::LoggedIn and ftpClient->currentCommand() == QFtp::Login) {
         listFiles(currentPath);
-        ui->loginMsg->clear();
+        logged = true;
     }
 }
 
@@ -173,14 +175,7 @@ void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
             currentPath += '/';
             currentPath += name;
 
-            std::cout << currentPath.toStdString() << std::endl;
-
-            fileList->clear();
-            isDir.clear();
-
-            QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-            widgetItem->setText(0, "..");
-            fileList->addTopLevelItem(widgetItem);
+            restartTreeWidget();
 
             ftpClient->cd(name);
             ftpClient->list();
@@ -190,19 +185,11 @@ void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
 
 void MainWindow::leaveFolder()
 {
-      fileList->clear();
-      isDir.clear();
-
-      QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-      widgetItem->setText(0, "..");
-      fileList->addTopLevelItem(widgetItem);
-
+      restartTreeWidget();
       currentPath = currentPath.left(currentPath.lastIndexOf('/'));
-      std::cout << currentPath.toStdString() << std::endl;
       if(currentPath.isEmpty()) {
           currentPath = "~";
           ftpClient->cd("~");
-          fileList->topLevelItem(0)->setDisabled(true);
       } else {
           ftpClient->cd(currentPath);
       }
@@ -214,15 +201,6 @@ void MainWindow::listDone(bool error)
 {
     if (error) {
         std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
-    }
-}
-
-void MainWindow::uploadProgressBarSlot(qint64 done, qint64 total)
-{
-    ui->uploadProgressBar->setValue(100*done/total);
-    if(done == total){
-        fileList->setEnabled(true);
-        ui->uploadButton->setEnabled(true);
     }
 }
 
@@ -239,11 +217,20 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
+
     fileList->setEnabled(false);
     ui->uploadButton->setEnabled(false);
 
+
+    if (logged) {
+        ftpClient->rawCommand("PWD");
+        QObject::connect(ftpClient, &QFtp::rawCommandReply,
+                         this, &MainWindow::pwdHandler);
+    }
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         QMessageBox::critical(this, "Alert", "Files did not selected.");
+    else if (!logged)
+        QMessageBox::critical(this, "Alert", "You are not connected.");
     else {
         const auto listOfFiles = ui->uploadFileInput->text().split(";");
         foreach (const auto file, listOfFiles) {
@@ -251,9 +238,12 @@ void MainWindow::on_uploadButton_clicked()
             QFile readFile(file);
             readFile.open(QIODevice::ReadOnly);
             const QByteArray buffer = readFile.readAll();
-            ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+            int putID = ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+            fileList->setEnabled(false);
             QObject::connect(ftpClient, &QFtp::dataTransferProgress,
-                             this, &MainWindow::uploadProgressBarSlot);
+                             this, &MainWindow::progressBarSlot);
+            QObject::connect(ftpClient, &QFtp::commandFinished,
+                             this, &MainWindow::uploadFinishHandler);
         }
     }
 }
@@ -294,6 +284,7 @@ void MainWindow::on_downloadButton_clicked()
             QObject::connect(ftpClient, &QFtp::dataTransferProgress,
                              this, &MainWindow::downloadProgressBarSlot);
 
+
         }
 
 
@@ -331,4 +322,31 @@ void MainWindow::on_treeWidget_clicked()
 
 }
 
+
+
+
+void MainWindow::progressBarSlot(qint64 done, qint64 total)
+{
+    ui->uploadProgressBar->setValue(100*done/total);
+    if(done == total)
+        fileList->setEnabled(true);
+}
+
+void MainWindow::uploadFinishHandler(int id, bool error)
+{
+    if (error) {
+        fileList->setEnabled(true);
+        std::cout << ftpClient->errorString().toUtf8().data() << std::endl;
+        ftpClient->rawCommand("PWD");
+
+    }
+}
+
+void MainWindow::pwdHandler(int replyCode, const QString& detail)
+{
+    qDebug() << "-----------------------";
+    qDebug() << detail;
+    qDebug() << "-----------------------";
+
+}
 
