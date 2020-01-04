@@ -47,6 +47,7 @@ void MainWindow::restartTreeWidget()
     fileList->addTopLevelItem(widgetItem);
 
 
+
     // ctrl+click for multi-select
     fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -55,6 +56,7 @@ void MainWindow::restartTreeWidget()
     widgetItem->setDisabled(true);
 
 }
+
 
 void MainWindow::ftpDone(bool error)
 {
@@ -218,10 +220,6 @@ void MainWindow::on_openButton_clicked()
 void MainWindow::on_uploadButton_clicked()
 {
 
-    fileList->setEnabled(false);
-    ui->uploadButton->setEnabled(false);
-
-
     if (logged) {
         ftpClient->rawCommand("PWD");
         QObject::connect(ftpClient, &QFtp::rawCommandReply,
@@ -244,6 +242,7 @@ void MainWindow::on_uploadButton_clicked()
                              this, &MainWindow::progressBarSlot);
             QObject::connect(ftpClient, &QFtp::commandFinished,
                              this, &MainWindow::uploadFinishHandler);
+
         }
     }
 }
@@ -285,6 +284,7 @@ void MainWindow::on_downloadButton_clicked()
                              this, &MainWindow::downloadProgressBarSlot);
 
 
+
         }
 
 
@@ -300,6 +300,7 @@ void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
         ui->downloadButton->setEnabled(true);
     }
 }
+
 
 void MainWindow::on_treeWidget_clicked()
 {
@@ -321,6 +322,7 @@ void MainWindow::on_treeWidget_clicked()
     ui->downloadFileInput->setText(filenamesQ.join(';'));
 
 }
+
 
 
 
@@ -349,4 +351,7 @@ void MainWindow::pwdHandler(int replyCode, const QString& detail)
     qDebug() << "-----------------------";
 
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> c4314dd60cbbc3b6a1b7fc03d0025f54bb69841e
