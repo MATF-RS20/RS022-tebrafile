@@ -101,7 +101,8 @@ void MainWindow::showLoginDialog(int state)
     if (state == QFtp::Connected and ftpClient->error() == QFtp::NoError) {
         InputDialog* diag = new InputDialog(this,
                                             QString("username"),
-                                            QString("password"));
+                                            QString("password")
+                                            );
         QObject::connect(diag, &InputDialog::credentialsCaptured, this, &MainWindow::login);
         diag->exec();
     } else if (state == QFtp::Unconnected and ftpClient->currentCommand() != QFtp::Close){
@@ -213,11 +214,13 @@ void MainWindow::listDone(bool error)
     }
 }
 
-void MainWindow::progressBarSlot(qint64 done, qint64 total)
+void MainWindow::uploadProgressBarSlot(qint64 done, qint64 total)
 {
     ui->uploadProgressBar->setValue(100*done/total);
-    if(done == total)
+    if(done == total){
         fileList->setEnabled(true);
+        ui->uploadButton->setEnabled(true);
+    }
 }
 
 
@@ -227,13 +230,14 @@ void MainWindow::on_openButton_clicked()
     const auto filenames = QFileDialog::getOpenFileNames(
                 this,
                 "Select files",
-                "/");
+                QDir::homePath());
     ui->uploadFileInput->setText(filenames.join(';'));
 }
 
 void MainWindow::on_uploadButton_clicked()
 {
     fileList->setEnabled(false);
+    ui->uploadButton->setEnabled(false);
 
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         QMessageBox::critical(this, "Alert", "Files did not selected.");
@@ -246,7 +250,45 @@ void MainWindow::on_uploadButton_clicked()
             const QByteArray buffer = readFile.readAll();
             ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
             QObject::connect(ftpClient, &QFtp::dataTransferProgress,
-                             this, &MainWindow::progressBarSlot);
+                             this, &MainWindow::uploadProgressBarSlot);
         }
     }
 }
+
+void MainWindow::on_downloadButton_clicked()
+{
+    fileList->setEnabled(false);
+    ui->downloadButton->setEnabled(false);
+
+    QString fileName = fileList->currentItem()->text(0);
+    QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    qDebug()<< downloadsFolder;
+
+    file = new QFile(downloadsFolder + "/" + fileName);
+
+    if (!file->open(QIODevice::WriteOnly)) {
+     QMessageBox::information(this, tr("FTP"),
+                              tr("Unable to save the file %1: %2.")
+                              .arg(fileName).arg(file->errorString()));
+     delete file;
+     return;
+    }
+
+    ftpClient->get(fileName, file);
+    QObject::connect(ftpClient, &QFtp::dataTransferProgress,
+                     this, &MainWindow::downloadProgressBarSlot);
+
+}
+
+void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
+{
+    ui->downloadProgressBar->setValue(100*done/total);
+    if(done == total){
+        fileList->setEnabled(true);
+        ui->downloadButton->setEnabled(true);
+    }
+}
+
+
+
+

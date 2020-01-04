@@ -130,9 +130,16 @@
      </widget>
     </item>
     <item>
-     <widget class="QProgressBar" name="downloadProgress">
+     <widget class="QProgressBar" name="downloadProgressBar">
       <property name="value">
        <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="downloadButton">
+      <property name="text">
+       <string>Download</string>
       </property>
      </widget>
     </item>
@@ -169,4 +176,3 @@
  <resources/>
  <connections/>
 </ui>
-

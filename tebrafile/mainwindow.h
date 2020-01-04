@@ -18,8 +18,8 @@
 #include <QFtp>
 #include <QHash>
 #include <QTreeWidget>
-
-
+#include <QDir>
+#include <QStandardPaths>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -47,7 +47,8 @@ public slots:
     void listFiles(const QString& fileName);
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);
     void leaveFolder();
-    void progressBarSlot(qint64 done, qint64 total);
+    void uploadProgressBarSlot(qint64 done, qint64 total);
+    void downloadProgressBarSlot(qint64 done, qint64 total);
 
 private slots:
     void on_connectButton_clicked();
@@ -56,13 +57,14 @@ private slots:
     void on_openButton_clicked();
 
     void on_uploadButton_clicked();
+    void on_downloadButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;
     QFtp* ftpClient;
 
-
+    QFile *file;
 
     QString ftpAdrress;
     int ftpPort;
@@ -82,7 +84,7 @@ private:
     QHash<QString, bool> isDir;
     QString currentPath;
     QString uploadFileName;
-    QString downloadFIlename;
+    QString downloadFilename;
 
 
     void connectToServer();
