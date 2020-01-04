@@ -20,6 +20,8 @@
 #include <QTreeWidget>
 #include <QDir>
 #include <QStandardPaths>
+#include <QThread>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,6 +60,8 @@ private slots:
 
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
+
+    void on_treeWidget_clicked();
 
 private:
     Ui::MainWindow *ui;

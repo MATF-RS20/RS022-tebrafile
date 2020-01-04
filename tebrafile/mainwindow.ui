@@ -56,7 +56,7 @@
     <item>
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Upload file:</string>
+       <string>Upload file(s):</string>
       </property>
      </widget>
     </item>
@@ -128,6 +128,16 @@
        </property>
       </column>
      </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Download file(s):</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="downloadFileInput"/>
     </item>
     <item>
      <widget class="QProgressBar" name="downloadProgressBar">

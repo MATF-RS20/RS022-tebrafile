@@ -52,6 +52,8 @@ public:
     QLineEdit *donwloadPath;
     QPushButton *setFolderButton;
     QTreeWidget *treeWidget;
+    QLabel *label_2;
+    QLineEdit *downloadFileInput;
     QProgressBar *downloadProgressBar;
     QPushButton *downloadButton;
     QSpacerItem *verticalSpacer;
@@ -160,6 +162,16 @@ public:
 
         verticalLayout->addWidget(treeWidget);
 
+        label_2 = new QLabel(centralwidget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+
+        verticalLayout->addWidget(label_2);
+
+        downloadFileInput = new QLineEdit(centralwidget);
+        downloadFileInput->setObjectName(QStringLiteral("downloadFileInput"));
+
+        verticalLayout->addWidget(downloadFileInput);
+
         downloadProgressBar = new QProgressBar(centralwidget);
         downloadProgressBar->setObjectName(QStringLiteral("downloadProgressBar"));
         downloadProgressBar->setValue(0);
@@ -195,12 +207,13 @@ public:
         label2->setText(QApplication::translate("MainWindow", "ServerName:", Q_NULLPTR));
         connectButton->setText(QApplication::translate("MainWindow", "Connect", Q_NULLPTR));
         disconnectButton->setText(QApplication::translate("MainWindow", "Disconnect", Q_NULLPTR));
-        label->setText(QApplication::translate("MainWindow", "Upload file:", Q_NULLPTR));
+        label->setText(QApplication::translate("MainWindow", "Upload file(s):", Q_NULLPTR));
         uploadFileInput->setText(QString());
         loginMsg->setText(QString());
         openButton->setText(QApplication::translate("MainWindow", "Open", Q_NULLPTR));
         uploadButton->setText(QApplication::translate("MainWindow", "Upload", Q_NULLPTR));
         setFolderButton->setText(QApplication::translate("MainWindow", "Set Folder", Q_NULLPTR));
+        label_2->setText(QApplication::translate("MainWindow", "Download file(s):", Q_NULLPTR));
         downloadButton->setText(QApplication::translate("MainWindow", "Download", Q_NULLPTR));
     } // retranslateUi
 
