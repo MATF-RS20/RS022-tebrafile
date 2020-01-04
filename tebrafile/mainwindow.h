@@ -48,6 +48,8 @@ public slots:
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);
     void leaveFolder();
     void progressBarSlot(qint64 done, qint64 total);
+    void uploadFinishHandler(int id, bool error);
+    void pwdHandler(int replyCode, const QString& detail);
 
 private slots:
     void on_connectButton_clicked();
@@ -84,6 +86,7 @@ private:
     QString uploadFileName;
     QString downloadFIlename;
 
+    bool logged = false;
 
     void connectToServer();
 };

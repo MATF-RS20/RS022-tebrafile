@@ -38,8 +38,6 @@ void MainWindow::ftpDone(bool error)
 {
     if (error) {
         std::cerr << "Error: " << qPrintable(ftpClient->errorString()) << std::endl;
-        ui->loginMsg->setText(ftpClient->errorString());
-        ui->loginMsg->setStyleSheet("QLabel {color : red}");
         ftpClient->disconnect();
     }
 }
@@ -93,7 +91,6 @@ void MainWindow::on_disconnectButton_clicked()
     fileList->addTopLevelItem(widgetItem);
     fileList->setEnabled(false);
 
-    ui->loginMsg->setText("You are disconnected");
 }
 
 void MainWindow::showLoginDialog(int state)
@@ -121,7 +118,7 @@ void MainWindow::afterLogin(int state)
     currentPath = QString("~");
     if (state == QFtp::LoggedIn and ftpClient->currentCommand() == QFtp::Login) {
         listFiles(currentPath);
-        ui->loginMsg->clear();
+        logged = true;
     }
 }
 
@@ -213,30 +210,28 @@ void MainWindow::listDone(bool error)
     }
 }
 
-void MainWindow::progressBarSlot(qint64 done, qint64 total)
-{
-    ui->uploadProgressBar->setValue(100*done/total);
-    if(done == total)
-        fileList->setEnabled(true);
-}
-
-
 
 void MainWindow::on_openButton_clicked()
 {
     const auto filenames = QFileDialog::getOpenFileNames(
                 this,
                 "Select files",
-                "/");
+                QDir::homePath());
     ui->uploadFileInput->setText(filenames.join(';'));
 }
 
 void MainWindow::on_uploadButton_clicked()
 {
-    fileList->setEnabled(false);
 
+    if (logged) {
+        ftpClient->rawCommand("PWD");
+        QObject::connect(ftpClient, &QFtp::rawCommandReply,
+                         this, &MainWindow::pwdHandler);
+    }
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         QMessageBox::critical(this, "Alert", "Files did not selected.");
+    else if (!logged)
+        QMessageBox::critical(this, "Alert", "You are not connected.");
     else {
         const auto listOfFiles = ui->uploadFileInput->text().split(";");
         foreach (const auto file, listOfFiles) {
@@ -244,9 +239,40 @@ void MainWindow::on_uploadButton_clicked()
             QFile readFile(file);
             readFile.open(QIODevice::ReadOnly);
             const QByteArray buffer = readFile.readAll();
-            ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+            int putID = ftpClient->put(buffer, namesParts.last(), QFtp::Binary);
+            fileList->setEnabled(false);
             QObject::connect(ftpClient, &QFtp::dataTransferProgress,
                              this, &MainWindow::progressBarSlot);
+            QObject::connect(ftpClient, &QFtp::commandFinished,
+                             this, &MainWindow::uploadFinishHandler);
         }
     }
+}
+
+
+
+void MainWindow::progressBarSlot(qint64 done, qint64 total)
+{
+
+    ui->uploadProgressBar->setValue(100*done/total);
+    if(done == total)
+        fileList->setEnabled(true);
+}
+
+void MainWindow::uploadFinishHandler(int id, bool error)
+{
+    if (error) {
+        fileList->setEnabled(true);
+        std::cout << ftpClient->errorString().toUtf8().data() << std::endl;
+        ftpClient->rawCommand("PWD");
+
+    }
+}
+
+void MainWindow::pwdHandler(int replyCode, const QString& detail)
+{
+    qDebug() << "-----------------------";
+    qDebug() << detail;
+    qDebug() << "-----------------------";
+
 }
