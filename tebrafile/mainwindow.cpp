@@ -52,7 +52,15 @@ void MainWindow::restartTreeWidget()
     widgetItem->setText(0, "..");
     fileList->addTopLevelItem(widgetItem);
 
+
+
+    // ctrl+click for multi-select
+    fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    manager = new QNetworkAccessManager(this);
+
     widgetItem->setDisabled(true);
+
 }
 
 void MainWindow::on_header_cliked(int logicalIndex)
@@ -120,7 +128,8 @@ void MainWindow::showLoginDialog(int state)
     if (state == QFtp::Connected and ftpClient->error() == QFtp::NoError) {
         InputDialog* diag = new InputDialog(this,
                                             QString("username"),
-                                            QString("password"));
+                                            QString("password")
+                                            );
         QObject::connect(diag, &InputDialog::credentialsCaptured, this, &MainWindow::login);
         diag->exec();
     } else if (state == QFtp::Unconnected and ftpClient->currentCommand() != QFtp::Close){
@@ -219,6 +228,7 @@ void MainWindow::listDone(bool error)
 }
 
 
+
 void MainWindow::on_openButton_clicked()
 {
     const auto filenames = QFileDialog::getOpenFileNames(
@@ -253,11 +263,86 @@ void MainWindow::on_uploadButton_clicked()
                              this, &MainWindow::progressBarSlot);
             QObject::connect(ftpClient, &QFtp::commandFinished,
                              this, &MainWindow::uploadFinishHandler);
+
         }
     }
 }
 
 
+
+void MainWindow::on_downloadButton_clicked()
+{
+
+    if (ui->downloadFileInput->text().trimmed().length() == 0)
+        QMessageBox::critical(this, "Alert", "Files did not selected.");
+    else
+    {
+
+        fileList->setEnabled(false);
+        ui->downloadButton->setEnabled(false);
+        const auto downloadList = ui->downloadFileInput->text().split(";");
+
+
+        //QString fileName = fileList->currentItem()->text(0);
+
+        QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+
+
+        for(auto fileName : downloadList)
+        {
+            file = new QFile(downloadsFolder + "/" + fileName);
+
+            if (!file->open(QIODevice::WriteOnly)) {
+             QMessageBox::information(this, tr("FTP"),
+                                      tr("Unable to save the file %1: %2.")
+                                      .arg(fileName).arg(file->errorString()));
+             delete file;
+             return;
+            }
+
+            ftpClient->get(fileName, file);
+            QObject::connect(ftpClient, &QFtp::dataTransferProgress,
+                             this, &MainWindow::downloadProgressBarSlot);
+
+
+
+        }
+
+
+
+    }
+}
+
+void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
+{
+    ui->downloadProgressBar->setValue(100*done/total);
+    if(done == total){
+        fileList->setEnabled(true);
+        ui->downloadButton->setEnabled(true);
+    }
+}
+
+
+void MainWindow::on_treeWidget_clicked()
+{
+    const auto filenames = fileList->selectedItems();
+    QStringList filenamesQ;
+
+    //ruzno ali radi
+    // fix sa refactorisanjem i std::transform
+    QString temp;
+    for(auto filename : filenames)
+    {
+        temp = filename->text(0);
+        filenamesQ.push_back(temp);
+    }
+
+
+
+
+    ui->downloadFileInput->setText(filenamesQ.join(';'));
+
+}
 
 void MainWindow::progressBarSlot(qint64 done, qint64 total)
 {
@@ -283,3 +368,4 @@ void MainWindow::pwdHandler(int replyCode, const QString& detail)
     qDebug() << "-----------------------";
 
 }
+
