@@ -61,6 +61,8 @@ private slots:
 
     void on_uploadButton_clicked();
 
+    void on_header_cliked(int logicalIndex);
+
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager* manager;
@@ -87,6 +89,8 @@ private:
     QString currentPath;
     QString uploadFileName;
     QString downloadFIlename;
+
+    QHeaderView *headerView;
 
     bool logged = false;
 

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <iostream>
 #include <QTreeView>
+#include <QHeaderView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -33,7 +34,12 @@ void MainWindow::initTreeWidget()
                                     << "Owner"
                                     << "Group"
                                     << "Last modified");
+    headerView = fileList->header();
+    headerView->setSectionsClickable(true);
+    headerView->resizeSection(0, 180);
+
     restartTreeWidget();
+    QObject::connect(headerView, SIGNAL( sectionClicked(int) ), this, SLOT( on_header_cliked(int) ) );
     QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
 }
 
@@ -47,6 +53,21 @@ void MainWindow::restartTreeWidget()
     fileList->addTopLevelItem(widgetItem);
 
     widgetItem->setDisabled(true);
+}
+
+void MainWindow::on_header_cliked(int logicalIndex)
+{
+    if(logicalIndex == 0) {
+        headerView->setSortIndicatorShown(true);
+        fileList ->takeTopLevelItem(0);
+        fileList ->sortItems(logicalIndex, headerView->sortIndicatorOrder());
+
+        QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
+        widgetItem->setText(0, "..");
+        fileList->insertTopLevelItem(0, widgetItem);
+    } else {
+        headerView->setSortIndicatorShown(false);
+    }
 }
 
 void MainWindow::ftpDone(bool error)
@@ -138,7 +159,7 @@ void MainWindow::addToList(const QUrlInfo& file)
     widgetItem->setText(1, QString::number(file.size()));
     widgetItem->setText(2, file.owner());
     widgetItem->setText(3, file.group());
-    widgetItem->setText(4, file.lastModified().toString("dd/mm/yyyy"));
+    widgetItem->setText(4, file.lastModified().toString("dd.MM.yyyy"));
 
     QIcon* folderIcon = new QIcon("../icons/directory.png");
     QIcon* fileIcon = new QIcon("../icons/file.png");
@@ -173,6 +194,7 @@ void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
             ftpClient->list();
         }
     }
+    headerView->setSortIndicatorShown(false);
 }
 
 void MainWindow::leaveFolder()
@@ -186,7 +208,7 @@ void MainWindow::leaveFolder()
           ftpClient->cd(currentPath);
       }
       ftpClient->list();
-
+      headerView->setSortIndicatorShown(false);
 }
 
 void MainWindow::listDone(bool error)
