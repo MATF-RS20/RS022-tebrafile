@@ -1,7 +1,7 @@
 #ifndef SERVERCONNECTION_H
 #define SERVERCONNECTION_H
 
-#include "messages.h"
+#include "logger.h"
 #include "inputDialog.h"
 
 #include <QFtp>
@@ -13,14 +13,18 @@ class ServerConnection : public QObject
 {
     Q_OBJECT
 public:
-    ServerConnection(QObject* parent, const QUrl& url);
+    ServerConnection(QObject* parent, const QUrl& url, const QSharedPointer<Logger>& logerPtr);
     ~ServerConnection() {
-        client->disconnect();
-        client->close();
-        qDebug() << "Server disconnection";
+        _client->disconnect();
+        _client->close();
+        _loger->consoleLog("You are disconnected from " + _hostURL.host());
     }
     void connectToServer();
-    QFtp* getClient() const;
+    QSharedPointer<QFtp> getClient() const;
+
+
+    bool isLogged() const;
+    bool isConnected() const;
 
 private slots:
     void finishedHandler(int id, bool error);
@@ -31,15 +35,20 @@ private:
     void showLoginDialog();
 
 
-    QSharedPointer<QFtp> client;
-    int connectionId;
-    int loginId;
-    QUrl hostURL;
-    bool validURL = true;
-    QWidget* window;
+    QSharedPointer<QFtp> _client;
 
+    int _connectionId;
+    int _loginId;
 
+    QUrl _hostURL;
 
+    bool _validURL = false;
+    bool _connected = false;
+    bool _logged = false;
+
+    QWidget* _window;
+
+    QSharedPointer<Logger> _loger;
 };
 
 #endif // SERVERCONNECTION_H

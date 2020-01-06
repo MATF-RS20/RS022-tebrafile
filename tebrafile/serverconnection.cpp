@@ -4,33 +4,38 @@
 #include <QMessageBox>
 #include <QDebug>
 
-ServerConnection::ServerConnection(QObject* window, const QUrl& url)
-    :hostURL(url)
+ServerConnection::ServerConnection(QObject* window, const QUrl& url, const QSharedPointer<Logger>& logerPtr)
+    :_hostURL(url)
 {
     if (url.isValid())
-        validURL = true;
+        _validURL = true;
     else
-        showMessageBox("Alert", "URL is invalid.", QMessageBox::Critical);
-    client = QSharedPointer<QFtp>(new QFtp(window));
-    this->window = static_cast<QWidget*>(window);
+        Logger::showMessageBox("Alert", "URL is invalid.", QMessageBox::Critical);
+    _client = QSharedPointer<QFtp>(new QFtp(window));
+    _loger = logerPtr;
+    this->_window = static_cast<QWidget*>(window);
 }
 
 void ServerConnection::connectToServer()
 {
-    connectionId = client->connectToHost(hostURL.host(), static_cast<quint16>(hostURL.port(21)));
-    QObject::connect(client.get(), &QFtp::commandFinished, this, &ServerConnection::finishedHandler);
+    _connectionId = _client->connectToHost(_hostURL.host(), static_cast<quint16>(_hostURL.port(21)));
+    QObject::connect(_client.get(), &QFtp::commandFinished, this, &ServerConnection::finishedHandler);
 }
 
-QFtp* ServerConnection::getClient() const
+QSharedPointer<QFtp> ServerConnection::getClient() const
 {
-    return client.get();
+    return _client;
 }
+
+bool ServerConnection::isLogged() const { return _logged; }
+bool ServerConnection::isConnected() const { return _connected; }
 
 
 void ServerConnection::showLoginDialog()
 {
-    if (client->state() == QFtp::Connected) {
-        InputDialog* diag = new InputDialog(window, QString("username"), QString("password"));
+    if (_client->state() == QFtp::Connected) {
+        InputDialog* diag = new InputDialog(_window, QString("username"), QString("password"));
+        QObject::connect(diag, &InputDialog::credentialsCaptured, this, &ServerConnection::logIn);
         diag->exec();
     }
 }
@@ -39,24 +44,30 @@ void ServerConnection::showLoginDialog()
 
 //Slots
 
+
+
 void ServerConnection::finishedHandler(int id, bool error)
 {
-    if (error and connectionId == id)
-        qDebug() << client->errorString();
-    else
+    if (error and _connectionId == id)
+        _loger->consoleLog(_client->errorString());
+    else if (!error and _connectionId == id){
+        _loger->consoleLog("You are connected");
+        _connected = true;
         showLoginDialog();
+    }
 }
 
 void ServerConnection::logIn(InputDialog* diag)
 {
     QStringList credentials = InputDialog::getStrings(diag);
-    loginId = client->login(credentials.at(0), credentials.at(1));
-    QObject::connect(client.get(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
+    _loginId = _client->login(credentials.at(0), credentials.at(1));
+    QObject::connect(_client.get(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
 }
 
 void ServerConnection::loginHandler(int id, bool error)
 {
-    if (client->state() == QFtp::LoggedIn and loginId == id) {
-
+    if (_client->state() == QFtp::LoggedIn and _loginId == id) {
+        _logged = true;
+        _loger->consoleLog("You are loggedIn");
     }
 }

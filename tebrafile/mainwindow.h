@@ -1,14 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include "serverconnection.h"
+#include "loader.h"
 
 #include <iostream>
 
 #include <QMainWindow>
 #include <QDebug>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkAccessManager>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -21,6 +19,7 @@
 #include <QStandardPaths>
 #include <QThread>
 #include <QUrl>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -34,11 +33,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void getFileList();
-
+    static QMutex uploadMutex;
 
 public slots:
     void addToList(const QUrlInfo& file);
-    void afterLogin(int state);
     void initTreeWidget();
     void restartTreeWidget();
     void listDone(bool error);
@@ -46,43 +44,33 @@ public slots:
     void cdToFolder(QTreeWidgetItem *widgetItem, int column);
     void leaveFolder();
 
-    void downloadProgressBarSlot(qint64 done, qint64 total);
-
-    void progressBarSlot(qint64 done, qint64 total);
-    void uploadFinishHandler(int id, bool error);
 
 private slots:
     void on_connectButton_clicked();
     void on_disconnectButton_clicked();
-
     void on_openButton_clicked();
-
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
-
     void on_treeWidget_clicked();
-
-    void on_header_cliked(int logicalIndex);
+    void on_header_clicked(int logicalIndex);
+    void uploadProgressBarSlot(int id, qint64 done, qint64 total);
+    void downloadProgressBarSlot(qint64 done, qint64 total);
 
 private:
     Ui::MainWindow *ui;
-
     ServerConnection* serverConn;
-    QFile *file;
 
-    QString username = "default1";
-    QString password = "DEFAULT1";
 
+    QVector<Loader*> loaders;
+    QHash<int, QPair<qint64, qint64>> uploadData;
+    QHash<int, QPair<qint64, qint64>> downloadData;
 
     QTreeWidget *fileList;
     QHash<QString, bool> isDir;
     QString currentPath;
-    QString uploadFileName;
-    QString downloadFilename;
 
     QHeaderView *headerView;
 
-    bool logged = false;
-
+    QSharedPointer<Logger> _logger;
 };
 #endif // MAINWINDOW_H

@@ -1,22 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "messages.h"
+
 
 #include <iostream>
+
 #include <QTreeView>
 #include <QHeaderView>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    _logger = QSharedPointer<Logger>(new Logger(ui->textEdit));
     fileList = ui->treeWidget;
     initTreeWidget();
     currentPath.clear();
-
-
 }
 
 MainWindow::~MainWindow()
@@ -41,7 +41,7 @@ void MainWindow::initTreeWidget()
     headerView->resizeSection(0, 180);
 
     restartTreeWidget();
-    QObject::connect(headerView, SIGNAL( sectionClicked(int) ), this, SLOT( on_header_cliked(int) ) );
+    QObject::connect(headerView, SIGNAL( sectionClicked(int) ), this, SLOT( on_header_clicked(int) ) );
     QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
 }
 
@@ -64,7 +64,7 @@ void MainWindow::restartTreeWidget()
 
 }
 
-void MainWindow::on_header_cliked(int logicalIndex)
+void MainWindow::on_header_clicked(int logicalIndex)
 {
     if(logicalIndex == 0) {
         headerView->setSortIndicatorShown(true);
@@ -82,7 +82,7 @@ void MainWindow::on_header_cliked(int logicalIndex)
 
 void MainWindow::on_connectButton_clicked()
 {
-    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()));
+    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
     serverConn->connectToServer();
 }
 
@@ -90,7 +90,10 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_disconnectButton_clicked()
 {
-    serverConn->~ServerConnection();
+    if (serverConn->isConnected())
+        serverConn->~ServerConnection();
+    else
+        _logger->consoleLog("Not connected.");
     currentPath.clear();
     restartTreeWidget();
 }
@@ -99,8 +102,8 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::listFiles(const QString& fileName)
 {
-    QObject::connect(serverConn->getClient(), &QFtp::listInfo, this, &MainWindow::addToList);
-    QObject::connect(serverConn->getClient(), &QFtp::done, this, &MainWindow::listDone);
+    QObject::connect(serverConn->getClient().get(), &QFtp::listInfo, this, &MainWindow::addToList);
+    QObject::connect(serverConn->getClient().get(), &QFtp::done, this, &MainWindow::listDone);
     serverConn->getClient()->list(fileName);
 }
 
@@ -184,26 +187,20 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
-
     if (ui->uploadFileInput->text().trimmed().length() == 0)
-        QMessageBox::critical(this, "Alert", "Files did not selected.");
-    else if (!logged)
-        QMessageBox::critical(this, "Alert", "You are not connected.");
+        Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
+    else if (!serverConn->isLogged())
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
+    else if (!serverConn->isConnected())
+        Logger::showMessageBox("Alert", "You are not connected.", QMessageBox::Critical);
     else {
-        const auto listOfFiles = ui->uploadFileInput->text().split(";");
-        foreach (const auto file, listOfFiles) {
-            const auto namesParts = file.split("/");
-            QFile readFile(file);
-            readFile.open(QIODevice::ReadOnly);
-            const QByteArray buffer = readFile.readAll();
-            int putID = serverConn->getClient()->put(buffer, namesParts.last(), QFtp::Binary);
-            fileList->setEnabled(false);
-            QObject::connect(serverConn->getClient(), &QFtp::dataTransferProgress,
-                             this, &MainWindow::progressBarSlot);
-            QObject::connect(serverConn->getClient(), &QFtp::commandFinished,
-                             this, &MainWindow::uploadFinishHandler);
-
-        }
+        const auto fileNames = ui->uploadFileInput->text().split(";");
+        std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
+            auto upload = new Uploader(fileName, serverConn->getClient(), _logger);
+            loaders.push_back(upload);
+            upload->start();
+            QObject::connect(upload, &Loader::signalProgress, this, &MainWindow::uploadProgressBarSlot);
+        });
     }
 }
 
@@ -216,7 +213,7 @@ void MainWindow::on_downloadButton_clicked()
         QMessageBox::critical(this, "Alert", "Files did not selected.");
     else
     {
-
+        QFile* file;
         fileList->setEnabled(false);
         ui->downloadButton->setEnabled(false);
         const auto downloadList = ui->downloadFileInput->text().split(";");
@@ -240,7 +237,7 @@ void MainWindow::on_downloadButton_clicked()
             }
 
             serverConn->getClient()->get(fileName, file);
-            QObject::connect(serverConn->getClient(), &QFtp::dataTransferProgress,
+            QObject::connect(serverConn->getClient().get(), &QFtp::dataTransferProgress,
                              this, &MainWindow::downloadProgressBarSlot);
 
         }
@@ -273,28 +270,34 @@ void MainWindow::on_treeWidget_clicked()
     }
 
 
-
-
     ui->downloadFileInput->setText(filenamesQ.join(';'));
 
 }
 
-void MainWindow::progressBarSlot(qint64 done, qint64 total)
-{
-    ui->uploadProgressBar->setValue(100*done/total);
-    if(done == total)
-        fileList->setEnabled(true);
-}
+QMutex MainWindow::uploadMutex;
 
-void MainWindow::uploadFinishHandler(int id, bool error)
+void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
 {
-    if (error) {
+    uploadMutex.lock();
+    uploadData[id] = qMakePair(done, total);
+    QPair<qint64, qint64> currentProgress = std::accumulate(
+                    std::begin(uploadData),
+                    std::end(uploadData),
+                    qMakePair<qint64, qint64>(0, 0),
+                    [](auto acc, auto elem) {
+                        return qMakePair<qint64, qint64>(acc.first+elem.first, acc.second+elem.second);
+                    });
+    ui->uploadProgressBar->setValue(100*currentProgress.first / currentProgress.second);
+    if (currentProgress.first == currentProgress.second) {
         fileList->setEnabled(true);
-        std::cout << serverConn->getClient()->errorString().toUtf8().data() << std::endl;
+        for (auto loader : loaders)
+            if (loader->isFinished()) {
+                loader->exit();
+                delete dynamic_cast<Uploader*>(loader);
+            }
 
+        uploadData.clear();
+        loaders.clear();
     }
+    uploadMutex.unlock();
 }
-
-
-
-

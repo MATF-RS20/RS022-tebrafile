@@ -17,15 +17,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     inputDialog.cpp \
+    loader.cpp \
+    logger.cpp \
     main.cpp \
     mainwindow.cpp \
-    messages.cpp \
     serverconnection.cpp
 
 HEADERS += \
     inputDialog.h \
+    loader.h \
+    logger.h \
     mainwindow.h \
-    messages.h \
     serverconnection.h
 
 FORMS += \
