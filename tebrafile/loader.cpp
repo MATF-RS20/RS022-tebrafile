@@ -3,7 +3,7 @@
 
 #include <QFile>
 #include <QDebug>
-
+#include <QStandardPaths>
 
 void Loader::processProgress(qint64 done, qint64 total)
 {
@@ -30,4 +30,33 @@ void Uploader::handleFinish(int id, bool error)
         loger->consoleLog(client->errorString());
     else
         loger->consoleLog(fileName + " upload zavrsen.");
+}
+
+
+void Downloader::run()
+{
+    QFile* file;
+
+    QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+
+    file = new QFile(downloadsFolder + "/" + fileName);
+
+    if(!file->open(QIODevice::WriteOnly)) {
+        loger->consoleLog("Unable to save the file "+ fileName + ": " + file->errorString());
+        delete file;
+        return;
+    }
+
+    processId = client->get(fileName, file);
+    QObject::connect(client.data(), &QFtp::commandFinished, this, &Downloader::handleFinish);
+    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
+
+}
+
+void Downloader::handleFinish(int id, bool error)
+{
+    if (error)
+        loger->consoleLog(client->errorString());
+    else
+        loger->consoleLog(fileName + " Download zavrsen.");
 }

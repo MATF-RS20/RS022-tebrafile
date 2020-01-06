@@ -209,40 +209,25 @@ void MainWindow::on_uploadButton_clicked()
 void MainWindow::on_downloadButton_clicked()
 {
 
+    //negde mora ui->downloadButton->setEnabled(false);
+
+
     if (ui->downloadFileInput->text().trimmed().length() == 0)
-        QMessageBox::critical(this, "Alert", "Files did not selected.");
-    else
-    {
-        QFile* file;
-        fileList->setEnabled(false);
-        ui->downloadButton->setEnabled(false);
-        const auto downloadList = ui->downloadFileInput->text().split(";");
-
-
-        //QString fileName = fileList->currentItem()->text(0);
-
-        QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-
-
-        for(auto fileName : downloadList)
-        {
-            file = new QFile(downloadsFolder + "/" + fileName);
-
-            if (!file->open(QIODevice::WriteOnly)) {
-             QMessageBox::information(this, tr("FTP"),
-                                      tr("Unable to save the file %1: %2.")
-                                      .arg(fileName).arg(file->errorString()));
-             delete file;
-             return;
-            }
-
-            serverConn->getClient()->get(fileName, file);
-            QObject::connect(serverConn->getClient().data(), &QFtp::dataTransferProgress,
-                             this, &MainWindow::downloadProgressBarSlot);
-
-        }
-
+        Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
+    else if (!serverConn->isLogged())
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
+    else if (!serverConn->isConnected())
+        Logger::showMessageBox("Alert", "You are not connected.", QMessageBox::Critical);
+    else {
+        const auto fileNames = ui->downloadFileInput->text().split(";");
+        std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
+            auto download = new Downloader(fileName, serverConn->getClient(), _logger);
+            loaders.push_back(download);
+            download->start();
+            QObject::connect(download, &Loader::signalProgress, this, &MainWindow::downloadProgressBarSlot);
+        });
     }
+
 }
 
 void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
