@@ -19,8 +19,8 @@ void Uploader::run()
     }
     const auto buffer = file.readAll();
     processId = client->put(buffer, nameParts.last(), QFtp::Binary);
-    QObject::connect(client.get(), &QFtp::commandFinished, this, &Uploader::handleFinish);
-    QObject::connect(client.get(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
+    QObject::connect(client.data(), &QFtp::commandFinished, this, &Uploader::handleFinish);
+    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
 }
 
 

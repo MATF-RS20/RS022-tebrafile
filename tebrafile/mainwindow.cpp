@@ -102,8 +102,8 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::listFiles(const QString& fileName)
 {
-    QObject::connect(serverConn->getClient().get(), &QFtp::listInfo, this, &MainWindow::addToList);
-    QObject::connect(serverConn->getClient().get(), &QFtp::done, this, &MainWindow::listDone);
+    QObject::connect(serverConn->getClient().data(), &QFtp::listInfo, this, &MainWindow::addToList);
+    QObject::connect(serverConn->getClient().data(), &QFtp::done, this, &MainWindow::listDone);
     serverConn->getClient()->list(fileName);
 }
 
@@ -237,7 +237,7 @@ void MainWindow::on_downloadButton_clicked()
             }
 
             serverConn->getClient()->get(fileName, file);
-            QObject::connect(serverConn->getClient().get(), &QFtp::dataTransferProgress,
+            QObject::connect(serverConn->getClient().data(), &QFtp::dataTransferProgress,
                              this, &MainWindow::downloadProgressBarSlot);
 
         }

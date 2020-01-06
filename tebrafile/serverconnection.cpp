@@ -19,7 +19,7 @@ ServerConnection::ServerConnection(QObject* window, const QUrl& url, const QShar
 void ServerConnection::connectToServer()
 {
     _connectionId = _client->connectToHost(_hostURL.host(), static_cast<quint16>(_hostURL.port(21)));
-    QObject::connect(_client.get(), &QFtp::commandFinished, this, &ServerConnection::finishedHandler);
+    QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::finishedHandler);
 }
 
 QSharedPointer<QFtp> ServerConnection::getClient() const
@@ -61,7 +61,7 @@ void ServerConnection::logIn(InputDialog* diag)
 {
     QStringList credentials = InputDialog::getStrings(diag);
     _loginId = _client->login(credentials.at(0), credentials.at(1));
-    QObject::connect(_client.get(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
+    QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
 }
 
 void ServerConnection::loginHandler(int id, bool error)
