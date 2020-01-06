@@ -96,14 +96,6 @@ void MainWindow::on_disconnectButton_clicked()
 }
 
 
-void MainWindow::afterLogin(int state)
-{
-    currentPath = QString("~");
-    if (state == QFtp::LoggedIn and serverConn->getClient()->currentCommand() == QFtp::Login) {
-        listFiles(currentPath);
-
-    }
-}
 
 void MainWindow::listFiles(const QString& fileName)
 {
