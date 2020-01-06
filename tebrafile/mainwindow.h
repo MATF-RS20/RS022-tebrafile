@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
-#include "inputDialog.h"
+#include "serverconnection.h"
 
 #include <iostream>
 
@@ -21,7 +20,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QThread>
-
+#include <QUrl>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,14 +35,9 @@ public:
     ~MainWindow();
     void getFileList();
 
-signals:
-    void done();
 
 public slots:
     void addToList(const QUrlInfo& file);
-    void ftpDone(bool error);
-    void showLoginDialog(int state);
-    void login(InputDialog* diag);
     void afterLogin(int state);
     void initTreeWidget();
     void restartTreeWidget();
@@ -56,8 +50,6 @@ public slots:
 
     void progressBarSlot(qint64 done, qint64 total);
     void uploadFinishHandler(int id, bool error);
-    void pwdHandler(int replyCode, const QString& detail);
-
 
 private slots:
     void on_connectButton_clicked();
@@ -74,23 +66,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QNetworkAccessManager* manager;
-    QFtp* ftpClient;
 
+    ServerConnection* serverConn;
     QFile *file;
 
-    QString ftpAdrress;
-    int ftpPort;
     QString username = "default1";
     QString password = "DEFAULT1";
-
-    QUrl url;
-
-    QNetworkReply* downloadFileListReply;
-    QNetworkReply* uploadFileListReply;
-
-    QNetworkReply* downloadFileReply;
-    QNetworkReply* uploadFileReply;
 
 
     QTreeWidget *fileList;
@@ -103,6 +84,5 @@ private:
 
     bool logged = false;
 
-    void connectToServer();
 };
 #endif // MAINWINDOW_H
