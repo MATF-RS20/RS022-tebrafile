@@ -27,7 +27,7 @@ void Uploader::run()
 }
 
 
-void Loader::handleFinish(int id, bool error)
+void Uploader::handleFinish(int id, bool error)
 {
     qDebug() << "finsihed.";
     if (error)

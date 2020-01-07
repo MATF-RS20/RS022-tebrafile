@@ -35,8 +35,7 @@ protected:
     int processId;
     QSharedPointer<Logger> loger;
 
-protected slots:
-    void handleFinish(int id, bool error);
+
 };
 
 
@@ -53,6 +52,8 @@ public:
 
     }
 
+private slots:
+    void handleFinish(int id, bool error);
 };
 
 class Downloader : public Loader
