@@ -35,6 +35,7 @@ public:
     ~MainWindow();
     void getFileList();
     static QMutex uploadMutex;
+    static QMutex downloadMutex;
 
 public slots:
     void initTreeWidget();
@@ -47,7 +48,7 @@ private slots:
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
-    void downloadProgressBarSlot(qint64 done, qint64 total);
+    void downloadProgressBarSlot(int id, qint64 done, qint64 total);
 
 private:
     Ui::MainWindow *ui;

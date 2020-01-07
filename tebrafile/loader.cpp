@@ -48,6 +48,7 @@ void Downloader::run()
     }
 
     processId = client->get(fileName, file);
+
     QObject::connect(client.data(), &QFtp::commandFinished, this, &Downloader::handleFinish);
     QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
 
