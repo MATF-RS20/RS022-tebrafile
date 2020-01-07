@@ -27,6 +27,11 @@ QSharedPointer<QFtp> ServerConnection::getClient() const
     return _client;
 }
 
+QSharedPointer<Logger> ServerConnection::getLogger() const
+{
+    return _loger;
+}
+
 bool ServerConnection::isLogged() const { return _logged; }
 bool ServerConnection::isConnected() const { return _connected; }
 
@@ -69,5 +74,6 @@ void ServerConnection::loginHandler(int id, bool error)
     if (_client->state() == QFtp::LoggedIn and _loginId == id) {
         _logged = true;
         _loger->consoleLog("You are loggedIn");
+        emit connectionEstablished(_client);
     }
 }

@@ -14,9 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     _logger = QSharedPointer<Logger>(new Logger(ui->textEdit));
-    fileList = ui->treeWidget;
-    initTreeWidget();
-    currentPath.clear();
+
+    fileList = new ListFiles(ui->treeWidget);
 }
 
 MainWindow::~MainWindow()
@@ -26,67 +25,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::initTreeWidget()
 {
-    fileList->setEnabled(false);
-    fileList->setRootIsDecorated(true);
-    fileList->header()->setStretchLastSection(true);
-
-    fileList->setColumnCount(5);
-    fileList->setHeaderLabels(QStringList() << "Name"
-                                    << "Size"
-                                    << "Owner"
-                                    << "Group"
-                                    << "Last modified");
-    headerView = fileList->header();
-    headerView->setSectionsClickable(true);
-    headerView->resizeSection(0, 180);
-
-    restartTreeWidget();
-    QObject::connect(headerView, SIGNAL( sectionClicked(int) ), this, SLOT( on_header_clicked(int) ) );
-    QObject::connect(fileList, &QTreeWidget::itemDoubleClicked, this, &MainWindow::cdToFolder);
+    fileList->setServerConn(serverConn->getClient());
+    fileList->listFiles(QString("~/"));
 }
-
-void MainWindow::restartTreeWidget()
-{
-    fileList->clear();
-    isDir.clear();
-
-    QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-    widgetItem->setText(0, "..");
-    fileList->addTopLevelItem(widgetItem);
-
-
-
-    // ctrl+click for multi-select
-    fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-
-    widgetItem->setDisabled(true);
-
-}
-
-void MainWindow::on_header_clicked(int logicalIndex)
-{
-    if(logicalIndex == 0) {
-        headerView->setSortIndicatorShown(true);
-        fileList ->takeTopLevelItem(0);
-        fileList ->sortItems(logicalIndex, headerView->sortIndicatorOrder());
-
-        QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-        widgetItem->setText(0, "..");
-        fileList->insertTopLevelItem(0, widgetItem);
-    } else {
-        headerView->setSortIndicatorShown(false);
-    }
-}
-
 
 void MainWindow::on_connectButton_clicked()
 {
     serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
     serverConn->connectToServer();
+    QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
 }
-
-
 
 void MainWindow::on_disconnectButton_clicked()
 {
@@ -94,87 +42,9 @@ void MainWindow::on_disconnectButton_clicked()
         serverConn->~ServerConnection();
     else
         _logger->consoleLog("Not connected.");
-    currentPath.clear();
-    restartTreeWidget();
+    fileList->restartTreeWidget();
+    fileList->clearPath();
 }
-
-
-
-void MainWindow::listFiles(const QString& fileName)
-{
-    QObject::connect(serverConn->getClient().data(), &QFtp::listInfo, this, &MainWindow::addToList);
-    QObject::connect(serverConn->getClient().data(), &QFtp::done, this, &MainWindow::listDone);
-    serverConn->getClient()->list(fileName);
-}
-
-void MainWindow::addToList(const QUrlInfo& file)
-{
-    QTreeWidgetItem *widgetItem = new QTreeWidgetItem();
-
-    widgetItem->setText(0, file.name());
-    widgetItem->setText(1, QString::number(file.size()));
-    widgetItem->setText(2, file.owner());
-    widgetItem->setText(3, file.group());
-    widgetItem->setText(4, file.lastModified().toString("dd.MM.yyyy"));
-
-    QIcon* folderIcon = new QIcon("../icons/directory.png");
-    QIcon* fileIcon = new QIcon("../icons/file.png");
-    QIcon* icon(file.isDir() ? folderIcon : fileIcon);
-    widgetItem->setIcon(0, *icon);
-
-    isDir.insert(file.name(), file.isDir());
-
-    fileList->addTopLevelItem(widgetItem);
-
-    // ako je item prvi postavi ga za trenutno selektovani
-    if (!fileList->currentItem()) {
-        fileList->setCurrentItem(fileList->topLevelItem(1));
-        fileList->setEnabled(true);
-    }
-}
-
-void MainWindow::cdToFolder(QTreeWidgetItem *widgetItem, int column)
-{
-    // ako je korisnik izabrao da ide nazad
-    if(widgetItem == fileList->topLevelItem(0)) {
-        leaveFolder();
-    } else {
-        QString name = widgetItem->text(0);
-        if(isDir.value(name)) {
-            currentPath += '/';
-            currentPath += name;
-
-            restartTreeWidget();
-
-            serverConn->getClient()->cd(name);
-            serverConn->getClient()->list();
-        }
-    }
-    headerView->setSortIndicatorShown(false);
-}
-
-void MainWindow::leaveFolder()
-{
-      restartTreeWidget();
-      currentPath = currentPath.left(currentPath.lastIndexOf('/'));
-      if(currentPath.isEmpty()) {
-          currentPath = "~";
-          serverConn->getClient()->cd("~");
-      } else {
-          serverConn->getClient()->cd(currentPath);
-      }
-      serverConn->getClient()->list();
-      headerView->setSortIndicatorShown(false);
-}
-
-void MainWindow::listDone(bool error)
-{
-    if (error) {
-        std::cerr << "Error: " << qPrintable(serverConn->getClient()->errorString()) << std::endl;
-    }
-}
-
-
 
 void MainWindow::on_openButton_clicked()
 {
@@ -194,6 +64,7 @@ void MainWindow::on_uploadButton_clicked()
     else if (!serverConn->isConnected())
         Logger::showMessageBox("Alert", "You are not connected.", QMessageBox::Critical);
     else {
+        fileList->getTreeWidget()->setEnabled(false);
         const auto fileNames = ui->uploadFileInput->text().split(";");
         std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
             auto upload = new Uploader(fileName, serverConn->getClient(), _logger);
@@ -214,12 +85,12 @@ void MainWindow::on_downloadButton_clicked()
     else
     {
         QFile* file;
-        fileList->setEnabled(false);
+        fileList->getTreeWidget()->setEnabled(false);
         ui->downloadButton->setEnabled(false);
         const auto downloadList = ui->downloadFileInput->text().split(";");
 
 
-        //QString fileName = fileList->currentItem()->text(0);
+        //QString fileName = fileList->getTreewidget()->currentItem()->text(0);
 
         QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
 
@@ -249,7 +120,7 @@ void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
 {
     ui->downloadProgressBar->setValue(100*done/total);
     if(done == total){
-        fileList->setEnabled(true);
+        fileList->getTreeWidget()->setEnabled(true);
         ui->downloadButton->setEnabled(true);
     }
 }
@@ -257,7 +128,7 @@ void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
 
 void MainWindow::on_treeWidget_clicked()
 {
-    const auto filenames = fileList->selectedItems();
+    const auto filenames = fileList->getTreeWidget()->selectedItems();
     QStringList filenamesQ;
 
     //ruzno ali radi
@@ -289,13 +160,12 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
                     });
     ui->uploadProgressBar->setValue(100*currentProgress.first / currentProgress.second);
     if (currentProgress.first == currentProgress.second) {
-        fileList->setEnabled(true);
+        fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
-
         uploadData.clear();
         loaders.clear();
     }

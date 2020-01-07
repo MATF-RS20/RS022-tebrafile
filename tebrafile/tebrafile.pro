@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     inputDialog.cpp \
+    listFiles.cpp \
     loader.cpp \
     logger.cpp \
     main.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 
 HEADERS += \
     inputDialog.h \
+    listFiles.h \
     loader.h \
     logger.h \
     mainwindow.h \

@@ -21,7 +21,7 @@ public:
     }
     void connectToServer();
     QSharedPointer<QFtp> getClient() const;
-
+    QSharedPointer<Logger> getLogger() const;
 
     bool isLogged() const;
     bool isConnected() const;
@@ -30,6 +30,10 @@ private slots:
     void finishedHandler(int id, bool error);
     void loginHandler(int id, bool error);
     void logIn(InputDialog* diag);
+
+
+signals:
+    void connectionEstablished(QSharedPointer<QFtp> client);
 
 private:
     void showLoginDialog();

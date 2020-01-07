@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 #include "serverconnection.h"
 #include "loader.h"
+#include "listFiles.h"
 
 #include <iostream>
 
@@ -36,14 +37,7 @@ public:
     static QMutex uploadMutex;
 
 public slots:
-    void addToList(const QUrlInfo& file);
     void initTreeWidget();
-    void restartTreeWidget();
-    void listDone(bool error);
-    void listFiles(const QString& fileName);
-    void cdToFolder(QTreeWidgetItem *widgetItem, int column);
-    void leaveFolder();
-
 
 private slots:
     void on_connectButton_clicked();
@@ -52,7 +46,6 @@ private slots:
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
-    void on_header_clicked(int logicalIndex);
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(qint64 done, qint64 total);
 
@@ -65,12 +58,8 @@ private:
     QHash<int, QPair<qint64, qint64>> uploadData;
     QHash<int, QPair<qint64, qint64>> downloadData;
 
-    QTreeWidget *fileList;
-    QHash<QString, bool> isDir;
-    QString currentPath;
-
-    QHeaderView *headerView;
-
     QSharedPointer<Logger> _logger;
+
+    ListFiles *fileList;
 };
 #endif // MAINWINDOW_H
