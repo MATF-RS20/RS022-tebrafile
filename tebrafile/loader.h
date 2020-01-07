@@ -52,4 +52,20 @@ private slots:
     void handleFinish(int id, bool error);
 };
 
+class Downloader : public Loader
+{
+    Q_OBJECT
+public:
+    Downloader(const QString& file, const QSharedPointer<QFtp>& ftpClient, const QSharedPointer<Logger>& logerptr)
+        :Loader(file, ftpClient, logerptr)
+    {}
+
+    void run() override;
+    ~Downloader() override {
+
+    }
+private slots:
+    void handleFinish(int id, bool error);
+};
+
 #endif // LOADER_H
