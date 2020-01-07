@@ -51,7 +51,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    ServerConnection* serverConn;
+    ServerConnection* serverConn = nullptr;
 
 
     QVector<Loader*> loaders;

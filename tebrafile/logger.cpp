@@ -3,6 +3,7 @@
 #include<QDate>
 
 
+
 void Logger::showMessageBox(const QString& title, const QString& content, QMessageBox::Icon icon)
 {
     QMessageBox errBox;
@@ -12,10 +13,12 @@ void Logger::showMessageBox(const QString& title, const QString& content, QMessa
     errBox.exec();
 }
 
+QMutex Logger::loggerMutex;
 
 void Logger::consoleLog(const QString& msg)
 {
     _textEdit->moveCursor(QTextCursor::End);
     _textEdit->insertPlainText("[" + QDate::currentDate().toString(Qt::ISODateWithMs) + "] " + msg + "\r\n\r\n");
     _textEdit->moveCursor(QTextCursor::End);
+
 }

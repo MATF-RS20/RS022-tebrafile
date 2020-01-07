@@ -7,6 +7,7 @@
 #include <QSharedPointer>
 #include <QFtp>
 #include <QThread>
+#include <QMutex>
 
 class Loader : public QThread
 {
@@ -33,6 +34,9 @@ protected:
     QSharedPointer<QFtp> client;
     int processId;
     QSharedPointer<Logger> loger;
+
+protected slots:
+    void handleFinish(int id, bool error);
 };
 
 
@@ -48,8 +52,7 @@ public:
     ~Uploader() override {
 
     }
-private slots:
-    void handleFinish(int id, bool error);
+
 };
 
 class Downloader : public Loader

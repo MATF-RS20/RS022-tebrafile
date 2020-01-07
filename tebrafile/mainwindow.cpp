@@ -38,12 +38,14 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_disconnectButton_clicked()
 {
-    if (serverConn->isConnected())
-        serverConn->~ServerConnection();
-    else
+    if (nullptr == serverConn)
         _logger->consoleLog("Not connected.");
-    fileList->restartTreeWidget();
-    fileList->clearPath();
+    else if (!serverConn->isConnected())
+        _logger->consoleLog("Not connected.");
+    else {
+        fileList->restartTreeWidget();
+        fileList->clearPath();
+    }
 }
 
 void MainWindow::on_openButton_clicked()
@@ -136,17 +138,8 @@ QMutex MainWindow::uploadMutex;
 
 void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
 {
-    uploadMutex.lock();
-    uploadData[id] = qMakePair(done, total);
-    QPair<qint64, qint64> currentProgress = std::accumulate(
-                    std::begin(uploadData),
-                    std::end(uploadData),
-                    qMakePair<qint64, qint64>(0, 0),
-                    [](auto acc, auto elem) {
-                        return qMakePair<qint64, qint64>(acc.first+elem.first, acc.second+elem.second);
-                    });
-    ui->uploadProgressBar->setValue(100*currentProgress.first / currentProgress.second);
-    if (currentProgress.first == currentProgress.second) {
+    ui->uploadProgressBar->setValue(100*done / total);
+    if (done == total) {
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
