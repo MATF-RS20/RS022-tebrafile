@@ -43,6 +43,7 @@ void MainWindow::on_disconnectButton_clicked()
     else if (!serverConn->isConnected())
         _logger->consoleLog("Not connected.");
     else {
+        _logger->consoleLog("You are disconnected.");
         fileList->restartTreeWidget();
         fileList->clearPath();
     }
