@@ -106,15 +106,6 @@ void MainWindow::on_downloadButton_clicked()
 
 }
 
-void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
-{
-    ui->downloadProgressBar->setValue(100*done/total);
-    if(done == total){
-        fileList->getTreeWidget()->setEnabled(true);
-        ui->downloadButton->setEnabled(true);
-    }
-}
-
 
 void MainWindow::on_treeWidget_clicked()
 {
@@ -151,4 +142,23 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
         loaders.clear();
     }
     uploadMutex.unlock();
+}
+
+
+QMutex MainWindow::downloadMutex;
+
+void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
+{
+    ui->downloadProgressBar->setValue(100*done / total);
+    if (done == total) {
+        fileList->getTreeWidget()->setEnabled(true);
+        for (auto loader : loaders)
+            if (loader->isFinished()) {
+                loader->exit();
+                delete dynamic_cast<Downloader*>(loader);
+            }
+        downloadData.clear();
+        loaders.clear();
+    }
+    downloadMutex.unlock();
 }
