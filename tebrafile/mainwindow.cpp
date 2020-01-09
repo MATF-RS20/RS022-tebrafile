@@ -148,10 +148,11 @@ void MainWindow::on_treeWidget_clicked()
 
 QMutex MainWindow::uploadMutex;
 
-void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
+void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total, QString filename)
 {
     uploadMutex.lock();
     uploadData[id] = qMakePair(done, total);
+    names[id] = filename;
     QPair<qint64, qint64> currentProgress = std::accumulate(
                     std::begin(uploadData),
                     std::end(uploadData),
@@ -167,6 +168,9 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
+        for(auto name:names)
+            serverConn->getLogger()->consoleLog(name + " upload zavrsen.");
+        names.clear();
         uploadData.clear();
         loaders.clear();
     }
@@ -176,12 +180,4 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
 void MainWindow::uploadErrorHandler()
 {
     fileList->getTreeWidget()->setEnabled(true);
-}
-
-void MainWindow::pwdHandler(int replyCode, const QString& detail)
-{
-    qDebug() << "-----------------------";
-    qDebug() << detail;
-    qDebug() << "-----------------------";
-
 }

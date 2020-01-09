@@ -16,7 +16,7 @@ public slots:
     void processProgress(qint64 done, qint64 total);
 
 signals:
-    void signalProgress(int id, qint64 done, qint64 total);
+    void signalProgress(int id, qint64 done, qint64 total, QString filename);
     void uploadError();
 
 protected:

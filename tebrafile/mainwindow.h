@@ -46,10 +46,9 @@ private slots:
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
-    void uploadProgressBarSlot(int id, qint64 done, qint64 total);
+    void uploadProgressBarSlot(int id, qint64 done, qint64 total, QString filename);
     void downloadProgressBarSlot(qint64 done, qint64 total);
     void uploadErrorHandler();
-    void pwdHandler(int replyCode, const QString& detail);
 
 private:
     Ui::MainWindow *ui;
@@ -57,6 +56,7 @@ private:
 
 
     QVector<Loader*> loaders;
+    QHash<int, QString> names;
     QHash<int, QPair<qint64, qint64>> uploadData;
     QHash<int, QPair<qint64, qint64>> downloadData;
 
