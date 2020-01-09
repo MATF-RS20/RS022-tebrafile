@@ -48,6 +48,8 @@ private slots:
     void on_treeWidget_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(qint64 done, qint64 total);
+    void uploadErrorHandler();
+    void pwdHandler(int replyCode, const QString& detail);
 
 private:
     Ui::MainWindow *ui;
