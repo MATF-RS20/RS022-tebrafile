@@ -50,6 +50,11 @@ private slots:
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
 
+
+    void uploadErrorHandler();
+    void pwdHandler(int replyCode, const QString& detail);
+
+
 private:
     Ui::MainWindow *ui;
     ServerConnection* serverConn = nullptr;
