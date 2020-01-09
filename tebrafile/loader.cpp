@@ -10,12 +10,21 @@
 #include <iostream>
 
 
-void Loader::processProgress(qint64 done, qint64 total)
+void Uploader::uploadProcessProgress(qint64 done, qint64 total)
 {
     qDebug() << total;
     emit signalProgress(processId, done, total);
     if(done == total)
-        loger->consoleLog(fileName + " upload zavrsen.");
+        loger->consoleLog("Upload complete:" + fileName);
+
+}
+
+void Downloader::downloadProcessProgress(qint64 done, qint64 total)
+{
+    qDebug() << total;
+    emit signalProgress(processId, done, total);
+    if(done == total)
+        loger->consoleLog("Download complete:" + fileName);
 
 }
 
@@ -31,7 +40,7 @@ void Uploader::run()
     processId = client->put(buffer, nameParts.last(), QFtp::Binary);
 
     QObject::connect(client.data(), &QFtp::commandFinished, this, &Uploader::handleFinish);
-    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
+    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Uploader::uploadProcessProgress);
 }
 
 
@@ -64,7 +73,7 @@ void Downloader::run()
 
     processId = client->get(fileName, file);
     QObject::connect(client.data(), &QFtp::commandFinished, this, &Downloader::handleFinish);
-    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
+    QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Downloader::downloadProcessProgress);
 
 }
 

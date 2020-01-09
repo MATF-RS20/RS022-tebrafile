@@ -102,6 +102,7 @@ void MainWindow::on_downloadButton_clicked()
             loaders.push_back(download);
             download->start();
             QObject::connect(download, &Loader::signalProgress, this, &MainWindow::downloadProgressBarSlot);
+            QObject::connect(download, &Loader::downloadError, this, &MainWindow::downloadErrorHandler);
         });
     }
 
@@ -166,6 +167,11 @@ void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
 }
 
 void MainWindow::uploadErrorHandler()
+{
+    fileList->getTreeWidget()->setEnabled(true);
+}
+
+void MainWindow::downloadErrorHandler()
 {
     fileList->getTreeWidget()->setEnabled(true);
 }

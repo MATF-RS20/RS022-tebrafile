@@ -14,11 +14,12 @@ class Loader : public QThread
     Q_OBJECT
 
 public slots:
-    void processProgress(qint64 done, qint64 total);
+   // void processProgress(qint64 done, qint64 total);
 
 signals:
     void signalProgress(int id, qint64 done, qint64 total);
     void uploadError();
+    void downloadError();
 
 protected:
     Loader(const QString& file, const QSharedPointer<QFtp>& ftpClient, const QSharedPointer<Logger>& logerPtr)
@@ -52,6 +53,8 @@ public:
     ~Uploader() override {
 
     }
+public slots:
+       void uploadProcessProgress(qint64 done, qint64 total);
 
 private slots:
     void handleFinish(int id, bool error);
@@ -69,6 +72,9 @@ public:
     ~Downloader() override {
 
     }
+public slots:
+       void downloadProcessProgress(qint64 done, qint64 total);
+
 private slots:
     void handleFinish(int id, bool error);
 };

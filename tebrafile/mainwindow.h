@@ -52,6 +52,7 @@ private slots:
 
 
     void uploadErrorHandler();
+    void downloadErrorHandler();
     void pwdHandler(int replyCode, const QString& detail);
 
 
