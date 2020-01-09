@@ -15,7 +15,7 @@ void Uploader::uploadProcessProgress(qint64 done, qint64 total)
     qDebug() << total;
     emit signalProgress(processId, done, total);
     if(done == total)
-        loger->consoleLog("Upload complete:" + fileName);
+        loger->consoleLog("Upload complete: " + fileName);
 
 }
 
@@ -24,7 +24,7 @@ void Downloader::downloadProcessProgress(qint64 done, qint64 total)
     qDebug() << total;
     emit signalProgress(processId, done, total);
     if(done == total)
-        loger->consoleLog("Download complete:" + fileName);
+        loger->consoleLog("Download complete: " + fileName);
 
 }
 
