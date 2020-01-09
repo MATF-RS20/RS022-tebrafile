@@ -31,7 +31,7 @@ void MainWindow::initTreeWidget()
 
 void MainWindow::on_connectButton_clicked()
 {
-    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
+    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()),ui->portLine->text().toInt(), _logger);
     serverConn->connectToServer();
     QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
 }

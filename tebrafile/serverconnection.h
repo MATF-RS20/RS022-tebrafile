@@ -13,7 +13,7 @@ class ServerConnection : public QObject
 {
     Q_OBJECT
 public:
-    ServerConnection(QObject* parent, const QUrl& url, const QSharedPointer<Logger>& logerPtr);
+    ServerConnection(QObject* parent, const QUrl& url, const unsigned port,const QSharedPointer<Logger>& logerPtr);
     ~ServerConnection() {
         _client->disconnect();
         _client->close();
@@ -45,7 +45,7 @@ private:
     int _loginId;
 
     QUrl _hostURL;
-
+    int _port;
     bool _validURL = false;
     bool _connected = false;
     bool _logged = false;
