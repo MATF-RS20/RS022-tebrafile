@@ -3,11 +3,14 @@
 
 #include <QFile>
 #include <QDebug>
-
+#include <iostream>
 
 void Loader::processProgress(qint64 done, qint64 total)
 {
     emit signalProgress(processId, done, total);
+    if(done == total)
+        loger->consoleLog(fileName + " upload zavrsen.");
+
 }
 
 void Uploader::run()
@@ -18,6 +21,7 @@ void Uploader::run()
         loger->consoleLog(fileName + " can not be uploaded.");
     }
     const auto buffer = file.readAll();
+    //pwdId = client->rawCommand("PWD");
     processId = client->put(buffer, nameParts.last(), QFtp::Binary);
     QObject::connect(client.data(), &QFtp::commandFinished, this, &Uploader::handleFinish);
     QObject::connect(client.data(), &QFtp::dataTransferProgress, this, &Loader::processProgress);
@@ -26,8 +30,10 @@ void Uploader::run()
 
 void Uploader::handleFinish(int id, bool error)
 {
-    if (error)
+    //std::cout << client->currentCommand() << ":" << std::endl;
+    //std::cout << id << "==" << pwdId << "-" <<error<< std::endl;
+    if (error && id == processId) {
         loger->consoleLog(client->errorString());
-    else
-        loger->consoleLog(fileName + " upload zavrsen.");
+        emit uploadError();
+    }
 }

@@ -17,6 +17,7 @@ public slots:
 
 signals:
     void signalProgress(int id, qint64 done, qint64 total);
+    void uploadError();
 
 protected:
     Loader(const QString& file, const QSharedPointer<QFtp>& ftpClient, const QSharedPointer<Logger>& logerPtr)
@@ -48,6 +49,7 @@ public:
     ~Uploader() override {
 
     }
+
 private slots:
     void handleFinish(int id, bool error);
 };

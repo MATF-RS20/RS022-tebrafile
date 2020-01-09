@@ -14,7 +14,7 @@ class ListFiles : public QObject
 public:
     ListFiles(QTreeWidget* treeWidget);
     ~ListFiles(){
-        std::cout << "DESTOIED!!!!!!" << std::endl;
+
     }
 
     void listFiles(const QString& fileName);

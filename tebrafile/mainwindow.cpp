@@ -71,6 +71,7 @@ void MainWindow::on_uploadButton_clicked()
             loaders.push_back(upload);
             upload->start();
             QObject::connect(upload, &Loader::signalProgress, this, &MainWindow::uploadProgressBarSlot);
+            QObject::connect(upload, &Loader::uploadError, this, &MainWindow::uploadErrorHandler);
         });
     }
 }
@@ -170,4 +171,17 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
         loaders.clear();
     }
     uploadMutex.unlock();
+}
+
+void MainWindow::uploadErrorHandler()
+{
+    fileList->getTreeWidget()->setEnabled(true);
+}
+
+void MainWindow::pwdHandler(int replyCode, const QString& detail)
+{
+    qDebug() << "-----------------------";
+    qDebug() << detail;
+    qDebug() << "-----------------------";
+
 }
