@@ -4,8 +4,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
-ServerConnection::ServerConnection(QObject* window, const QUrl& url, const unsigned port, const QSharedPointer<Logger>& logerPtr)
-    :_hostURL(url), _port(port)
+ServerConnection::ServerConnection(QObject* window, const QUrl& url, const QSharedPointer<Logger>& logerPtr)
+    :_hostURL(url)
 {
     if (url.isValid())
         _validURL = true;
@@ -18,7 +18,7 @@ ServerConnection::ServerConnection(QObject* window, const QUrl& url, const unsig
 
 void ServerConnection::connectToServer()
 {
-    _connectionId = _client->connectToHost(_hostURL.host(), static_cast<quint16>(_hostURL.port(_port)));
+    _connectionId = _client->connectToHost(_hostURL.host(), static_cast<quint16>(_hostURL.port(21)));
     QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::finishedHandler);
 }
 

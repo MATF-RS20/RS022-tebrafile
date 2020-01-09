@@ -39,8 +39,6 @@ public:
     QLabel *label2;
     QHBoxLayout *hl3;
     QLineEdit *serverNameField;
-    QLineEdit *portLine;
-    QSpacerItem *horizontalSpacer;
     QPushButton *connectButton;
     QPushButton *disconnectButton;
     QLabel *label;
@@ -88,17 +86,6 @@ public:
         serverNameField->setMinimumSize(QSize(400, 0));
 
         hl3->addWidget(serverNameField);
-
-        portLine = new QLineEdit(centralwidget);
-        portLine->setObjectName(QStringLiteral("portLine"));
-        portLine->setEnabled(true);
-        portLine->setMaximumSize(QSize(50, 25));
-
-        hl3->addWidget(portLine);
-
-        horizontalSpacer = new QSpacerItem(20, 20, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-
-        hl3->addItem(horizontalSpacer);
 
         connectButton = new QPushButton(centralwidget);
         connectButton->setObjectName(QStringLiteral("connectButton"));
@@ -238,7 +225,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "tebraFile", Q_NULLPTR));
-        label2->setText(QApplication::translate("MainWindow", "ServerName:                                                                                             Port:", Q_NULLPTR));
+        label2->setText(QApplication::translate("MainWindow", "ServerName:", Q_NULLPTR));
         connectButton->setText(QApplication::translate("MainWindow", "Connect", Q_NULLPTR));
         disconnectButton->setText(QApplication::translate("MainWindow", "Disconnect", Q_NULLPTR));
         label->setText(QApplication::translate("MainWindow", "Upload file(s):", Q_NULLPTR));
