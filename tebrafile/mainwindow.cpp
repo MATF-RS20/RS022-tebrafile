@@ -60,7 +60,6 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
-    //loaders.clear();
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
     else if (!serverConn->isLogged())
