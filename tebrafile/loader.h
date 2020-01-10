@@ -7,17 +7,22 @@
 #include <QSharedPointer>
 #include <QFtp>
 #include <QThread>
+#include <QMutex>
 
 class Loader : public QThread
 {
     Q_OBJECT
 
+public:
+    QString getFileName();
+
 public slots:
-    void processProgress(qint64 done, qint64 total);
+   // void processProgress(qint64 done, qint64 total);
 
 signals:
-    void signalProgress(int id, qint64 done, qint64 total, QString filename);
+    void signalProgress(int id, qint64 done, qint64 total);
     void uploadError();
+    void downloadError();
 
 protected:
     Loader(const QString& file, const QSharedPointer<QFtp>& ftpClient, const QSharedPointer<Logger>& logerPtr)
@@ -34,6 +39,8 @@ protected:
     QSharedPointer<QFtp> client;
     int processId;
     QSharedPointer<Logger> loger;
+
+
 };
 
 
@@ -49,6 +56,27 @@ public:
     ~Uploader() override {
 
     }
+public slots:
+       void uploadProcessProgress(qint64 done, qint64 total);
+
+private slots:
+    void handleFinish(int id, bool error);
+};
+
+class Downloader : public Loader
+{
+    Q_OBJECT
+public:
+    Downloader(const QString& file, const QSharedPointer<QFtp>& ftpClient, const QSharedPointer<Logger>& logerptr)
+        :Loader(file, ftpClient, logerptr)
+    {}
+
+    void run() override;
+    ~Downloader() override {
+
+    }
+public slots:
+       void downloadProcessProgress(qint64 done, qint64 total);
 
 private slots:
     void handleFinish(int id, bool error);

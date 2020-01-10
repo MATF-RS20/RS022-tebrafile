@@ -38,12 +38,15 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_disconnectButton_clicked()
 {
-    if (serverConn->isConnected())
-        serverConn->~ServerConnection();
-    else
+    if (nullptr == serverConn)
         _logger->consoleLog("Not connected.");
-    fileList->restartTreeWidget();
-    fileList->clearPath();
+    else if (!serverConn->isConnected())
+        _logger->consoleLog("Not connected.");
+    else {
+        _logger->consoleLog("You are disconnected.");
+        fileList->restartTreeWidget();
+        fileList->clearPath();
+    }
 }
 
 void MainWindow::on_openButton_clicked()
@@ -57,6 +60,7 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
+    //loaders.clear();
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
     else if (!serverConn->isLogged())
@@ -81,49 +85,28 @@ void MainWindow::on_uploadButton_clicked()
 void MainWindow::on_downloadButton_clicked()
 {
 
+
+    //negde mora ui->downloadButton->setEnabled(false);
+
+
+
     if (ui->downloadFileInput->text().trimmed().length() == 0)
-        QMessageBox::critical(this, "Alert", "Files did not selected.");
-    else
-    {
-        QFile* file;
-        fileList->getTreeWidget()->setEnabled(false);
-        ui->downloadButton->setEnabled(false);
-        const auto downloadList = ui->downloadFileInput->text().split(";");
-
-
-        //QString fileName = fileList->getTreewidget()->currentItem()->text(0);
-
-        QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-
-
-        for(auto fileName : downloadList)
-        {
-            file = new QFile(downloadsFolder + "/" + fileName);
-
-            if (!file->open(QIODevice::WriteOnly)) {
-             QMessageBox::information(this, tr("FTP"),
-                                      tr("Unable to save the file %1: %2.")
-                                      .arg(fileName).arg(file->errorString()));
-             delete file;
-             return;
-            }
-
-            serverConn->getClient()->get(fileName, file);
-            QObject::connect(serverConn->getClient().data(), &QFtp::dataTransferProgress,
-                             this, &MainWindow::downloadProgressBarSlot);
-
-        }
-
+        Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
+    else if (!serverConn->isLogged())
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
+    else if (!serverConn->isConnected())
+        Logger::showMessageBox("Alert", "You are not connected.", QMessageBox::Critical);
+    else {
+        const auto fileNames = ui->downloadFileInput->text().split(";");
+        std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
+            auto download = new Downloader(fileName, serverConn->getClient(), _logger);
+            loaders.push_back(download);
+            download->start();
+            QObject::connect(download, &Loader::signalProgress, this, &MainWindow::downloadProgressBarSlot);
+            QObject::connect(download, &Loader::downloadError, this, &MainWindow::downloadErrorHandler);
+        });
     }
-}
 
-void MainWindow::downloadProgressBarSlot(qint64 done, qint64 total)
-{
-    ui->downloadProgressBar->setValue(100*done/total);
-    if(done == total){
-        fileList->getTreeWidget()->setEnabled(true);
-        ui->downloadButton->setEnabled(true);
-    }
 }
 
 
@@ -148,11 +131,10 @@ void MainWindow::on_treeWidget_clicked()
 
 QMutex MainWindow::uploadMutex;
 
-void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total, QString filename)
+void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
 {
     uploadMutex.lock();
     uploadData[id] = qMakePair(done, total);
-    names[id] = filename;
     QPair<qint64, qint64> currentProgress = std::accumulate(
                     std::begin(uploadData),
                     std::end(uploadData),
@@ -162,22 +144,59 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total, QStrin
                     });
     ui->uploadProgressBar->setValue(100*currentProgress.first / currentProgress.second);
     if (currentProgress.first == currentProgress.second) {
+        ui->uploadProgressBar->setValue(100*done / total);
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
+                serverConn->getLogger()->consoleLog(loader->getFileName() + " upload is finished.");
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
-        for(auto name:names)
-            serverConn->getLogger()->consoleLog(name + " upload zavrsen.");
-        names.clear();
         uploadData.clear();
         loaders.clear();
     }
     uploadMutex.unlock();
 }
 
+QMutex MainWindow::downloadMutex;
+
+void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
+{
+    ui->downloadProgressBar->setValue(100*done / total);
+    if (done == total) {
+        fileList->getTreeWidget()->setEnabled(true);
+        for (auto loader : loaders)
+            if (loader->isFinished()) {
+                serverConn->getLogger()->consoleLog(loader->getFileName() + " dowload is finished.");
+                loader->exit();
+                delete dynamic_cast<Downloader*>(loader);
+            }
+        downloadData.clear();
+        loaders.clear();
+    }
+    downloadMutex.unlock();
+}
+
 void MainWindow::uploadErrorHandler()
 {
+    for (auto loader : loaders)
+        if (loader->isFinished()) {
+            loader->exit();
+            delete dynamic_cast<Uploader*>(loader);
+        }
+    uploadData.clear();
+    loaders.clear();
+    fileList->getTreeWidget()->setEnabled(true);
+}
+
+void MainWindow::downloadErrorHandler()
+{
+    for (auto loader : loaders)
+        if (loader->isFinished()) {
+            loader->exit();
+            delete dynamic_cast<Downloader*>(loader);
+        }
+    downloadData.clear();
+    loaders.clear();
     fileList->getTreeWidget()->setEnabled(true);
 }

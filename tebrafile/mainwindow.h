@@ -21,6 +21,7 @@
 #include <QThread>
 #include <QUrl>
 #include <QMutex>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,6 +36,7 @@ public:
     ~MainWindow();
     void getFileList();
     static QMutex uploadMutex;
+    static QMutex downloadMutex;
 
 public slots:
     void initTreeWidget();
@@ -46,17 +48,20 @@ private slots:
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
-    void uploadProgressBarSlot(int id, qint64 done, qint64 total, QString filename);
-    void downloadProgressBarSlot(qint64 done, qint64 total);
+    void uploadProgressBarSlot(int id, qint64 done, qint64 total);
+    void downloadProgressBarSlot(int id, qint64 done, qint64 total);
+
     void uploadErrorHandler();
+    void downloadErrorHandler();
+
 
 private:
     Ui::MainWindow *ui;
-    ServerConnection* serverConn;
+    ServerConnection* serverConn = nullptr;
 
 
+    QVector<Loader*> uploaders;
     QVector<Loader*> loaders;
-    QHash<int, QString> names;
     QHash<int, QPair<qint64, qint64>> uploadData;
     QHash<int, QPair<qint64, qint64>> downloadData;
 
