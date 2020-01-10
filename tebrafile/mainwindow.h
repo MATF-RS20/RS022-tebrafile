@@ -3,6 +3,7 @@
 #include "serverconnection.h"
 #include "loader.h"
 #include "listFiles.h"
+#include "search.h"
 
 #include <iostream>
 
@@ -48,6 +49,7 @@ private slots:
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
+    void on_startButton_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
 
@@ -59,8 +61,6 @@ private:
     Ui::MainWindow *ui;
     ServerConnection* serverConn = nullptr;
 
-
-    QVector<Loader*> uploaders;
     QVector<Loader*> loaders;
     QHash<int, QPair<qint64, qint64>> uploadData;
     QHash<int, QPair<qint64, qint64>> downloadData;
@@ -68,5 +68,6 @@ private:
     QSharedPointer<Logger> _logger;
 
     ListFiles *fileList;
+    ListFiles *searchList;
 };
 #endif // MAINWINDOW_H

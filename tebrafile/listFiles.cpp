@@ -34,7 +34,7 @@ void ListFiles::listFiles(const QString& fileName)
 {
     QObject::connect(_serverConn.data(), &QFtp::listInfo, this, &ListFiles::addToList);
     QObject::connect(_serverConn.data(), &QFtp::done, this, &ListFiles::listDone);
-    _serverConn->list();
+    _serverConn->list(fileName);
 }
 
 void ListFiles::addToList(const QUrlInfo& file)
@@ -42,7 +42,10 @@ void ListFiles::addToList(const QUrlInfo& file)
     QTreeWidgetItem* widgetItem = new QTreeWidgetItem();
 
     widgetItem->setText(0, file.name());
-    widgetItem->setText(1, QString::number(file.size()));
+    if(file.isDir())
+        widgetItem->setText(1, QString("\\"));
+    else
+        widgetItem->setText(1, QString::number(file.size()));
     widgetItem->setText(2, file.owner());
     widgetItem->setText(3, file.group());
     widgetItem->setText(4, file.lastModified().toString("dd.MM.yyyy"));

@@ -16,17 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
     _logger = QSharedPointer<Logger>(new Logger(ui->textEdit));
 
     fileList = new ListFiles(ui->treeWidget);
+    searchList = new ListFiles(ui->searchWidget);
 }
 
 MainWindow::~MainWindow()
 {
+    delete fileList;
     delete ui;
-}
-
-void MainWindow::initTreeWidget()
-{
-    fileList->setServerConn(serverConn->getClient());
-    fileList->listFiles(QString("~/"));
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -34,6 +30,13 @@ void MainWindow::on_connectButton_clicked()
     serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
     serverConn->connectToServer();
     QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
+}
+
+
+void MainWindow::initTreeWidget()
+{
+    fileList->setServerConn(serverConn->getClient());
+    fileList->listFiles(QString("~/"));
 }
 
 void MainWindow::on_disconnectButton_clicked()
@@ -47,6 +50,10 @@ void MainWindow::on_disconnectButton_clicked()
         fileList->restartTreeWidget();
         fileList->clearPath();
     }
+}
+
+void MainWindow::on_startButton_clicked()
+{
 }
 
 void MainWindow::on_openButton_clicked()
