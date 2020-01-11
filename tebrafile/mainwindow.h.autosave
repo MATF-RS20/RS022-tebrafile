@@ -69,7 +69,5 @@ private:
 
     ListFiles *fileList;
     ListFiles *searchList;
-
-    Search *s;
 };
 #endif // MAINWINDOW_H

@@ -54,6 +54,24 @@ void MainWindow::on_disconnectButton_clicked()
 
 void MainWindow::on_startButton_clicked()
 {
+    if (nullptr == serverConn){
+        _logger->consoleLog("You must be connected.");
+        return;
+    } else if (!serverConn->isLogged()) {
+        _logger->consoleLog("You must be logged in.");
+        return;
+    }
+    QString filename = ui->searchFile->text().trimmed();
+    if (filename.length() == 0) {
+        _logger->consoleLog("File name can't be empty string.");
+        return;
+    }
+    QString path = ui->searchPath->text().trimmed();
+    if (path.length() == 0) {
+        path = QString("~");
+    }
+    Search *s = new Search(QSharedPointer<ListFiles>(searchList), filename, path, serverConn->getClient());
+    s->search();
 }
 
 void MainWindow::on_openButton_clicked()
@@ -154,7 +172,7 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                serverConn->getLogger()->consoleLog(loader->getFileName() + " upload is finished.");
+                _logger->consoleLog(loader->getFileName() + " upload is finished.");
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
@@ -173,7 +191,7 @@ void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                serverConn->getLogger()->consoleLog(loader->getFileName() + " dowload is finished.");
+                _logger->consoleLog(loader->getFileName() + " dowload is finished.");
                 loader->exit();
                 delete dynamic_cast<Downloader*>(loader);
             }

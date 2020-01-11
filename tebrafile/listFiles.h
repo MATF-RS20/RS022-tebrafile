@@ -24,6 +24,7 @@ public:
     void restartTreeWidget();
     void clearPath();
     QSharedPointer<QTreeWidget> getTreeWidget() const;
+    QSharedPointer<QHeaderView> getHeaderView() const;
     void setServerConn(const QSharedPointer<QFtp>& serverConn);
 
 private slots:
