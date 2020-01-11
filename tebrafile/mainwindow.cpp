@@ -66,13 +66,29 @@ void MainWindow::on_startButton_clicked()
         _logger->consoleLog("File name can't be empty string.");
         return;
     }
+    QRegularExpression *re = new QRegularExpression(filename);
+    if (!re->isValid()) {
+        _logger->consoleLog("Wrong regular expression.");
+        return;
+    }
     QString path = ui->searchPath->text().trimmed();
     if (path.length() == 0) {
         path = QString("~");
     }
-    Search *s = new Search(QSharedPointer<ListFiles>(searchList), filename, path, serverConn->getClient());
+    s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, serverConn->getClient());
+    QObject::connect(s, &Search::searchFinished, this, &MainWindow::searchDone);
     s->search();
 }
+
+void MainWindow::searchDone()
+{
+    qDebug() << "done";
+}
+
+void MainWindow::on_stopButton_clicked() {
+    s->stopSearch();
+}
+
 
 void MainWindow::on_openButton_clicked()
 {

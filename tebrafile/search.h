@@ -14,22 +14,29 @@ class Search : public QObject
 {
     Q_OBJECT
 public:
-    Search(QSharedPointer<ListFiles> treeWidget, QString filename, QString path, const QSharedPointer<QFtp>& client);
+    Search(QSharedPointer<ListFiles> treeWidget,
+           const QSharedPointer<QRegularExpression> filename,
+           QString path, const QSharedPointer<QFtp>& client);
     ~Search(){
 
     }
     void search();
+    void stopSearch();
     void addToList(const QUrlInfo& file);
 
 private slots:
-    void folderFinnished(bool error);
+    void folderFinished(bool error);
+
+signals:
+    void searchFinished();
 
 private:
     QSharedPointer<ListFiles> _treeWidget;
-    QString _filename;
+    QSharedPointer<QRegularExpression> _filename;
     QString _path;
     QSharedPointer<QFtp> _client;
     QVector<QString> _folders;
+    bool _stop = false;
 };
 
 

@@ -50,8 +50,11 @@ private slots:
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
     void on_startButton_clicked();
+    void on_stopButton_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
+
+    void searchDone();
 
     void uploadErrorHandler();
     void downloadErrorHandler();
@@ -67,9 +70,9 @@ private:
 
     QSharedPointer<Logger> _logger;
 
-    ListFiles *fileList;
-    ListFiles *searchList;
+    ListFiles *fileList = nullptr;
+    ListFiles *searchList = nullptr;
 
-    Search *s;
+    Search *s = nullptr;
 };
 #endif // MAINWINDOW_H
