@@ -17,6 +17,7 @@ Search::Search(QSharedPointer<ListFiles> treeWidget, const QSharedPointer<QRegul
 
 void Search::run()
 {
+    _ongoing = true;
     _client->list(_path);
 }
 
@@ -26,10 +27,14 @@ void Search::folderFinished(bool error)
         std::cerr << "Error: " << qPrintable(_client->errorString()) << std::endl;
     } else if (_stop == false){
         if (_folders.isEmpty()) {
-            emit searchFinished();
+            this->stopSearch();
+            this->quit();
         }
-        _path = _folders.takeFirst();
-        _client->list(_path);
+        qDebug() << _path;
+        if(!_folders.isEmpty())
+            _path = _folders.takeFirst();
+        //if(QDir(_path).exists())
+            _client->list(_path);
     }
 }
 
@@ -50,7 +55,10 @@ void Search::addToList(const QUrlInfo& file)
 
 void Search::stopSearch()
 {
+    _ongoing = false;
     _stop = true;
     _folders.clear();
     emit searchFinished();
 }
+
+bool Search::isOngoing() { return _ongoing; }

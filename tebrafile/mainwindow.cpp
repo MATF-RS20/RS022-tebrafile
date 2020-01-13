@@ -81,11 +81,14 @@ void MainWindow::on_startButton_clicked()
     QStringList credentials = InputDialog::getStrings(serverConn->getDiag().data());
     client->login(credentials.at(0), credentials.at(1));
 
-    s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
-    QObject::connect(s, &Search::searchFinished,
-                     this, &MainWindow::searchDone,
-                     Qt::QueuedConnection);
-    s->start();
+    if (s == nullptr || !s->isOngoing()) {
+        s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
+        QObject::connect(s, &Search::searchFinished,
+                         this, &MainWindow::searchDone,
+                         Qt::QueuedConnection);
+        s->start();
+    }
+
 }
 
 void MainWindow::searchDone()
@@ -94,7 +97,8 @@ void MainWindow::searchDone()
 }
 
 void MainWindow::on_stopButton_clicked() {
-    s->stopSearch();
+    if(s != nullptr)
+        s->stopSearch();
 }
 
 

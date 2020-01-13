@@ -8,6 +8,7 @@
 #include <QTreeWidget>
 #include <QHeaderView>
 #include <QHash>
+#include <QDir>
 #include <iostream>
 #include <QThread>
 
@@ -23,6 +24,7 @@ public:
     }
     void stopSearch();
     void addToList(const QUrlInfo& file);
+    bool isOngoing();
 
 private slots:
     void folderFinished(bool error);
@@ -40,6 +42,7 @@ private:
     QSharedPointer<QFtp> _client;
     QVector<QString> _folders;
     bool _stop = false;
+    bool _ongoing = false;
 };
 
 
