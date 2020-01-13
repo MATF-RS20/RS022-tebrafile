@@ -82,8 +82,10 @@ void MainWindow::on_startButton_clicked()
     client->login(credentials.at(0), credentials.at(1));
 
     s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
-    QObject::connect(s, &Search::searchFinished, this, &MainWindow::searchDone);
-    s->search();
+    QObject::connect(s, &Search::searchFinished,
+                     this, &MainWindow::searchDone,
+                     Qt::QueuedConnection);
+    s->start();
 }
 
 void MainWindow::searchDone()

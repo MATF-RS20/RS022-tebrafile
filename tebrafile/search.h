@@ -9,8 +9,9 @@
 #include <QHeaderView>
 #include <QHash>
 #include <iostream>
+#include <QThread>
 
-class Search : public QObject
+class Search : public QThread
 {
     Q_OBJECT
 public:
@@ -20,7 +21,6 @@ public:
     ~Search(){
 
     }
-    void search();
     void stopSearch();
     void addToList(const QUrlInfo& file);
 
@@ -29,6 +29,9 @@ private slots:
 
 signals:
     void searchFinished();
+
+protected:
+    void run() override;
 
 private:
     QSharedPointer<ListFiles> _treeWidget;

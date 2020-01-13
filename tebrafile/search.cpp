@@ -15,7 +15,7 @@ Search::Search(QSharedPointer<ListFiles> treeWidget, const QSharedPointer<QRegul
     QObject::connect(_client.data(), &QFtp::done, this, &Search::folderFinished);
 }
 
-void Search::search()
+void Search::run()
 {
     _client->list(_path);
 }
@@ -40,7 +40,7 @@ void Search::addToList(const QUrlInfo& file)
             if (_filename->match(file.name()).hasMatch()){
                 QUrlInfo tmp(file);
                 tmp.setName(_path + "/" + file.name());
-                 _treeWidget->addToList(file);
+                 _treeWidget->addToList(tmp);
             }
         } else {
             _folders.push_back(_path + "/" + file.name());
