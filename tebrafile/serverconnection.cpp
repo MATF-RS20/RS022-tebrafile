@@ -66,6 +66,7 @@ void ServerConnection::logIn(InputDialog* diag)
 {
     QStringList credentials = InputDialog::getStrings(diag);
     _loginId = _client->login(credentials.at(0), credentials.at(1));
+    _diag = QSharedPointer<InputDialog>(diag);
     QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
 }
 
@@ -76,4 +77,8 @@ void ServerConnection::loginHandler(int id, bool error)
         _loger->consoleLog("You are loggedIn");
         emit connectionEstablished(_client);
     }
+}
+
+QSharedPointer<InputDialog> ServerConnection::getDiag() const{
+    return _diag;
 }

@@ -75,7 +75,13 @@ void MainWindow::on_startButton_clicked()
     if (path.length() == 0) {
         path = QString("~");
     }
-    s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, serverConn->getClient());
+
+    client = QSharedPointer<QFtp>(new QFtp(this));
+    client->connectToHost(QUrl(ui->serverNameField->text()).host(), static_cast<quint16>(QUrl(ui->serverNameField->text()).port(21)));
+    QStringList credentials = InputDialog::getStrings(serverConn->getDiag().data());
+    client->login(credentials.at(0), credentials.at(1));
+
+    s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
     QObject::connect(s, &Search::searchFinished, this, &MainWindow::searchDone);
     s->search();
 }

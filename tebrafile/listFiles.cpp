@@ -22,8 +22,6 @@ ListFiles::ListFiles(QTreeWidget* treeWidget)
     _headerView->resizeSection(0, 180);
 
     ListFiles::restartTreeWidget();
-    QObject::connect(_headerView.data(), &QHeaderView::sectionClicked, this, &ListFiles::on_header_clicked);
-    QObject::connect(_treeWidget.data(), &QTreeWidget::itemDoubleClicked, this, &ListFiles::cdToFolder);
 }
 
 void ListFiles::setServerConn(const QSharedPointer<QFtp>& serverConn){
@@ -32,6 +30,8 @@ void ListFiles::setServerConn(const QSharedPointer<QFtp>& serverConn){
 
 void ListFiles::listFiles(const QString& fileName)
 {
+    QObject::connect(_treeWidget.data(), &QTreeWidget::itemDoubleClicked, this, &ListFiles::cdToFolder);
+    QObject::connect(_headerView.data(), &QHeaderView::sectionClicked, this, &ListFiles::on_header_clicked);
     QObject::connect(_serverConn.data(), &QFtp::listInfo, this, &ListFiles::addToList);
     QObject::connect(_serverConn.data(), &QFtp::done, this, &ListFiles::listDone);
     _serverConn->list(fileName);
@@ -68,7 +68,7 @@ void ListFiles::addToList(const QUrlInfo& file)
 void ListFiles::cdToFolder(QTreeWidgetItem *widgetItem, int column)
 {
     // ako je korisnik izabrao da ide nazad
-    if(widgetItem == _treeWidget->topLevelItem(0)) {
+    if(widgetItem == _treeWidget->topLevelItem(0) && !(_treeWidget->topLevelItem(0)->isDisabled())) {
         leaveFolder();
     } else {
         QString name = widgetItem->text(0);
@@ -77,6 +77,7 @@ void ListFiles::cdToFolder(QTreeWidgetItem *widgetItem, int column)
             _currentPath += name;
 
             ListFiles::restartTreeWidget();
+            _treeWidget->topLevelItem(0)->setDisabled(false);
 
             _serverConn->cd(name);
             _serverConn->list();
@@ -94,6 +95,13 @@ void ListFiles::leaveFolder()
     } else {
         _serverConn->cd(_currentPath);
     }
+    ListFiles::restartTreeWidget();
+
+    if (_currentPath == "~")
+        _treeWidget->topLevelItem(0)->setDisabled(true);
+    else
+        _treeWidget->topLevelItem(0)->setDisabled(false);
+
     _serverConn->list();
     _headerView->setSortIndicatorShown(false);
 }
@@ -108,6 +116,7 @@ void ListFiles::restartTreeWidget()
     QTreeWidgetItem* widgetItem = new QTreeWidgetItem();
     widgetItem->setText(0, "..");
     _treeWidget.data()->addTopLevelItem(widgetItem);
+    _treeWidget->topLevelItem(0)->setDisabled(true);
 
     // ctrl+click for multi-select
     _treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -132,6 +141,10 @@ void ListFiles::on_header_clicked(int logicalIndex)
         QTreeWidgetItem* widgetItem = new QTreeWidgetItem();
         widgetItem->setText(0, "..");
         _treeWidget->insertTopLevelItem(0, widgetItem);
+        if (_currentPath == "~")
+            _treeWidget->topLevelItem(0)->setDisabled(true);
+        else
+            _treeWidget->topLevelItem(0)->setDisabled(false);
     } else {
         _headerView->setSortIndicatorShown(false);
     }

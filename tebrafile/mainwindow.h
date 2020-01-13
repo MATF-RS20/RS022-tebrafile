@@ -4,6 +4,7 @@
 #include "loader.h"
 #include "listFiles.h"
 #include "search.h"
+#include "inputDialog.h"
 
 #include <iostream>
 
@@ -74,5 +75,6 @@ private:
     ListFiles *searchList = nullptr;
 
     Search *s = nullptr;
+    QSharedPointer<QFtp> client;
 };
 #endif // MAINWINDOW_H
