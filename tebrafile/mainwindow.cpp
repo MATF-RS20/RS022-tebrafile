@@ -200,3 +200,22 @@ void MainWindow::downloadErrorHandler()
     loaders.clear();
     fileList->getTreeWidget()->setEnabled(true);
 }
+
+
+void MainWindow::on_downloadCancel_clicked()
+{
+    if(serverConn->getClient()->hasPendingCommands())
+        serverConn->getClient()->clearPendingCommands();
+
+    serverConn->getClient()->abort();
+    serverConn->getClient()->disconnect();
+
+    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
+    serverConn->connectToServer();
+    QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
+
+
+
+}
+
+
