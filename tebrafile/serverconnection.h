@@ -22,6 +22,7 @@ public:
     void connectToServer();
     QSharedPointer<QFtp> getClient() const;
     QSharedPointer<Logger> getLogger() const;
+    QSharedPointer<InputDialog> getDiag() const;
 
     bool isLogged() const;
     bool isConnected() const;
@@ -38,7 +39,6 @@ signals:
 private:
     void showLoginDialog();
 
-
     QSharedPointer<QFtp> _client;
 
     int _connectionId;
@@ -53,6 +53,7 @@ private:
     QWidget* _window;
 
     QSharedPointer<Logger> _loger;
+    QSharedPointer<InputDialog> _diag;
 };
 
 #endif // SERVERCONNECTION_H

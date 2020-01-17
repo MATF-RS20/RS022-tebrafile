@@ -16,17 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
     _logger = QSharedPointer<Logger>(new Logger(ui->textEdit));
 
     fileList = new ListFiles(ui->treeWidget);
+    searchList = new ListFiles(ui->searchWidget);
 }
 
 MainWindow::~MainWindow()
 {
+    delete fileList;
     delete ui;
-}
-
-void MainWindow::initTreeWidget()
-{
-    fileList->setServerConn(serverConn->getClient());
-    fileList->listFiles(QString("~/"));
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -34,6 +30,13 @@ void MainWindow::on_connectButton_clicked()
     serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
     serverConn->connectToServer();
     QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
+}
+
+
+void MainWindow::initTreeWidget()
+{
+    fileList->setServerConn(serverConn->getClient());
+    fileList->listFiles(QString("~/"));
 }
 
 void MainWindow::on_disconnectButton_clicked()
@@ -49,6 +52,56 @@ void MainWindow::on_disconnectButton_clicked()
     }
 }
 
+void MainWindow::on_startButton_clicked()
+{
+    if (nullptr == serverConn){
+        _logger->consoleLog("You must be connected.");
+        return;
+    } else if (!serverConn->isLogged()) {
+        _logger->consoleLog("You must be logged in.");
+        return;
+    }
+    QString filename = ui->searchFile->text().trimmed();
+    if (filename.length() == 0) {
+        _logger->consoleLog("File name can't be empty string.");
+        return;
+    }
+    QRegularExpression *re = new QRegularExpression(filename);
+    if (!re->isValid()) {
+        _logger->consoleLog("Wrong regular expression.");
+        return;
+    }
+    QString path = ui->searchPath->text().trimmed();
+    if (path.length() == 0) {
+        path = QString("~");
+    }
+
+    client = QSharedPointer<QFtp>(new QFtp(this));
+    client->connectToHost(QUrl(ui->serverNameField->text()).host(), static_cast<quint16>(QUrl(ui->serverNameField->text()).port(21)));
+    QStringList credentials = InputDialog::getStrings(serverConn->getDiag().data());
+    client->login(credentials.at(0), credentials.at(1));
+
+    if (s == nullptr || !s->isOngoing()) {
+        s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
+        QObject::connect(s, &Search::searchFinished,
+                         this, &MainWindow::searchDone,
+                         Qt::QueuedConnection);
+        s->start();
+    }
+
+}
+
+void MainWindow::searchDone()
+{
+    qDebug() << "done";
+}
+
+void MainWindow::on_stopButton_clicked() {
+    if(s != nullptr)
+        s->stopSearch();
+}
+
+
 void MainWindow::on_openButton_clicked()
 {
     const auto filenames = QFileDialog::getOpenFileNames(
@@ -60,7 +113,6 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
-    //loaders.clear();
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
     else if (!serverConn->isLogged())
@@ -148,7 +200,7 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                serverConn->getLogger()->consoleLog(loader->getFileName() + " upload is finished.");
+                _logger->consoleLog(loader->getFileName() + " upload is finished.");
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
@@ -167,7 +219,7 @@ void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                serverConn->getLogger()->consoleLog(loader->getFileName() + " dowload is finished.");
+                _logger->consoleLog(loader->getFileName() + " dowload is finished.");
                 loader->exit();
                 delete dynamic_cast<Downloader*>(loader);
             }

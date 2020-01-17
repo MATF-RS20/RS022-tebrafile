@@ -22,6 +22,7 @@ SOURCES += \
     logger.cpp \
     main.cpp \
     mainwindow.cpp \
+    search.cpp \
     serverconnection.cpp
 
 HEADERS += \
@@ -30,6 +31,7 @@ HEADERS += \
     loader.h \
     logger.h \
     mainwindow.h \
+    search.h \
     serverconnection.h
 
 FORMS += \
