@@ -20,12 +20,15 @@ public:
         _loger->consoleLog("You are disconnected from " + _hostURL.host());
     }
     void connectToServer();
+    void relogIn();
+
     QSharedPointer<QFtp> getClient() const;
     QSharedPointer<Logger> getLogger() const;
     QSharedPointer<InputDialog> getDiag() const;
 
     bool isLogged() const;
     bool isConnected() const;
+
 
 private slots:
     void finishedHandler(int id, bool error);
@@ -45,6 +48,9 @@ private:
     int _loginId;
 
     QUrl _hostURL;
+    QString username;
+    QString password;
+
 
     bool _validURL = false;
     bool _connected = false;

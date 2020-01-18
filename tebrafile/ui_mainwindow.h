@@ -62,6 +62,18 @@ public:
     QPushButton *downloadButton;
     QPushButton *downloadCancel;
     QSpacerItem *verticalSpacer;
+    QFrame *line_2;
+    QVBoxLayout *vl2;
+    QHBoxLayout *hl7;
+    QLabel *label_4;
+    QLineEdit *searchFile;
+    QHBoxLayout *hl5;
+    QLabel *label_5;
+    QLineEdit *searchPath;
+    QHBoxLayout *hl6;
+    QPushButton *startButton;
+    QPushButton *stopButton;
+    QTreeWidget *searchWidget;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -69,7 +81,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(800, 600);
+        MainWindow->resize(854, 791);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout = new QVBoxLayout(centralwidget);
@@ -210,14 +222,93 @@ public:
 
         verticalLayout->addWidget(downloadCancel);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Minimum);
+        verticalSpacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
         verticalLayout->addItem(verticalSpacer);
+
+        line_2 = new QFrame(centralwidget);
+        line_2->setObjectName(QStringLiteral("line_2"));
+        line_2->setFrameShape(QFrame::HLine);
+        line_2->setFrameShadow(QFrame::Sunken);
+
+        verticalLayout->addWidget(line_2);
+
+        vl2 = new QVBoxLayout();
+        vl2->setObjectName(QStringLiteral("vl2"));
+        vl2->setSizeConstraint(QLayout::SetMaximumSize);
+        vl2->setContentsMargins(5, 5, 5, 5);
+        hl7 = new QHBoxLayout();
+        hl7->setObjectName(QStringLiteral("hl7"));
+        hl7->setContentsMargins(0, 0, 0, 0);
+        label_4 = new QLabel(centralwidget);
+        label_4->setObjectName(QStringLiteral("label_4"));
+        QFont font;
+        font.setFamily(QStringLiteral("Ubuntu"));
+        font.setPointSize(11);
+        font.setBold(false);
+        font.setWeight(50);
+        label_4->setFont(font);
+
+        hl7->addWidget(label_4);
+
+        searchFile = new QLineEdit(centralwidget);
+        searchFile->setObjectName(QStringLiteral("searchFile"));
+
+        hl7->addWidget(searchFile);
+
+
+        vl2->addLayout(hl7);
+
+        hl5 = new QHBoxLayout();
+        hl5->setObjectName(QStringLiteral("hl5"));
+        hl5->setContentsMargins(0, 0, 0, 0);
+        label_5 = new QLabel(centralwidget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        QFont font1;
+        font1.setPointSize(11);
+        label_5->setFont(font1);
+
+        hl5->addWidget(label_5);
+
+        searchPath = new QLineEdit(centralwidget);
+        searchPath->setObjectName(QStringLiteral("searchPath"));
+
+        hl5->addWidget(searchPath);
+
+
+        vl2->addLayout(hl5);
+
+        hl6 = new QHBoxLayout();
+        hl6->setObjectName(QStringLiteral("hl6"));
+        hl6->setContentsMargins(0, 0, -1, -1);
+        startButton = new QPushButton(centralwidget);
+        startButton->setObjectName(QStringLiteral("startButton"));
+
+        hl6->addWidget(startButton);
+
+        stopButton = new QPushButton(centralwidget);
+        stopButton->setObjectName(QStringLiteral("stopButton"));
+
+        hl6->addWidget(stopButton);
+
+
+        vl2->addLayout(hl6);
+
+        searchWidget = new QTreeWidget(centralwidget);
+        QTreeWidgetItem *__qtreewidgetitem1 = new QTreeWidgetItem();
+        __qtreewidgetitem1->setText(0, QStringLiteral("1"));
+        searchWidget->setHeaderItem(__qtreewidgetitem1);
+        searchWidget->setObjectName(QStringLiteral("searchWidget"));
+
+        vl2->addWidget(searchWidget);
+
+
+        verticalLayout->addLayout(vl2);
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 22));
+        menubar->setGeometry(QRect(0, 0, 854, 22));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QStringLiteral("statusbar"));
@@ -243,6 +334,10 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "Download file(s):", Q_NULLPTR));
         downloadButton->setText(QApplication::translate("MainWindow", "Download", Q_NULLPTR));
         downloadCancel->setText(QApplication::translate("MainWindow", "Cancel", Q_NULLPTR));
+        label_4->setText(QApplication::translate("MainWindow", "File name or regular expression:", Q_NULLPTR));
+        label_5->setText(QApplication::translate("MainWindow", "Search in:", Q_NULLPTR));
+        startButton->setText(QApplication::translate("MainWindow", "Start", Q_NULLPTR));
+        stopButton->setText(QApplication::translate("MainWindow", "Stop", Q_NULLPTR));
     } // retranslateUi
 
 };

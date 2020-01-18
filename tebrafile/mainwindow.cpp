@@ -262,11 +262,9 @@ void MainWindow::on_downloadCancel_clicked()
     serverConn->getClient()->abort();
     serverConn->getClient()->disconnect();
 
-    serverConn = new ServerConnection(this, QUrl(ui->serverNameField->text()), _logger);
-    serverConn->connectToServer();
-    QObject::connect(serverConn, &ServerConnection::connectionEstablished, this, &MainWindow::initTreeWidget);
+    serverConn->relogIn();
 
-
+    ui->downloadProgressBar->setValue(0);
 
 }
 
