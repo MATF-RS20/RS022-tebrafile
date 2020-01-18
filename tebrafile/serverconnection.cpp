@@ -78,7 +78,7 @@ void ServerConnection::relogIn()
 {
 
         _loginId = _client->login(username, password);
-        QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
+        QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::reloginHandler);
 }
 
 
@@ -87,7 +87,16 @@ void ServerConnection::loginHandler(int id, bool error)
 {
     if (_client->state() == QFtp::LoggedIn and _loginId == id) {
         _logged = true;
-        _loger->consoleLog("You are loggedIn");
+        _loger->consoleLog("You are logged in");
+        emit connectionEstablished(_client);
+    }
+}
+
+void ServerConnection::reloginHandler(int id, bool error)
+{
+    if (_client->state() == QFtp::LoggedIn and _loginId == id) {
+        _logged = true;
+        _loger->consoleLog("Abort success");
         emit connectionEstablished(_client);
     }
 }

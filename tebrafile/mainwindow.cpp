@@ -157,7 +157,7 @@ void MainWindow::on_downloadButton_clicked()
         path = "~";
 
     //negde mora ui->downloadButton->setEnabled(false);
-
+    ui->downloadCancel->setEnabled(true);
 
 
     if (ui->downloadFileInput->text().trimmed().length() == 0)
@@ -292,12 +292,24 @@ void MainWindow::on_downloadCancel_clicked()
         serverConn->getClient()->clearPendingCommands();
 
     serverConn->getClient()->abort();
-    serverConn->getClient()->disconnect();
-
-    serverConn->relogIn();
 
     ui->downloadProgressBar->setValue(0);
+    loaders.clear();
 
+    QDir dir;
+    QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    const auto fileNames = ui->downloadFileInput->text().split(";");
+
+    for(auto fileName : fileNames)
+    {
+        dir.remove(downloadsFolder + "/" + fileName);
+        _logger->consoleLog(fileName + ": Download canceled.");
+    }
+
+    serverConn->getClient()->disconnect();
+    serverConn->relogIn();
+
+    ui->downloadCancel->setEnabled(false);
 }
 
 

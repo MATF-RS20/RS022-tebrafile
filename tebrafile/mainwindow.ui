@@ -157,7 +157,11 @@
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="downloadFileInput"/>
+     <widget class="QLineEdit" name="downloadFileInput">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QProgressBar" name="downloadProgressBar">

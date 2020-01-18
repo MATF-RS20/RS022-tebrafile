@@ -34,6 +34,7 @@ public:
 private slots:
     void finishedHandler(int id, bool error);
     void loginHandler(int id, bool error);
+    void reloginHandler(int id, bool error);
     void logIn(InputDialog* diag);
 
 

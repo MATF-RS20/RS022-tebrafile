@@ -64,10 +64,9 @@ public:
     QSpacerItem *verticalSpacer;
     QFrame *line_2;
     QVBoxLayout *vl2;
-    QHBoxLayout *hl7;
+    QHBoxLayout *hl5;
     QLabel *label_4;
     QLineEdit *searchFile;
-    QHBoxLayout *hl5;
     QLabel *label_5;
     QLineEdit *searchPath;
     QHBoxLayout *hl6;
@@ -203,6 +202,7 @@ public:
 
         downloadFileInput = new QLineEdit(centralwidget);
         downloadFileInput->setObjectName(QStringLiteral("downloadFileInput"));
+        downloadFileInput->setReadOnly(true);
 
         verticalLayout->addWidget(downloadFileInput);
 
@@ -237,9 +237,9 @@ public:
         vl2->setObjectName(QStringLiteral("vl2"));
         vl2->setSizeConstraint(QLayout::SetMaximumSize);
         vl2->setContentsMargins(5, 5, 5, 5);
-        hl7 = new QHBoxLayout();
-        hl7->setObjectName(QStringLiteral("hl7"));
-        hl7->setContentsMargins(0, 0, 0, 0);
+        hl5 = new QHBoxLayout();
+        hl5->setObjectName(QStringLiteral("hl5"));
+        hl5->setContentsMargins(0, 0, 0, 0);
         label_4 = new QLabel(centralwidget);
         label_4->setObjectName(QStringLiteral("label_4"));
         QFont font;
@@ -249,19 +249,13 @@ public:
         font.setWeight(50);
         label_4->setFont(font);
 
-        hl7->addWidget(label_4);
+        hl5->addWidget(label_4);
 
         searchFile = new QLineEdit(centralwidget);
         searchFile->setObjectName(QStringLiteral("searchFile"));
 
-        hl7->addWidget(searchFile);
+        hl5->addWidget(searchFile);
 
-
-        vl2->addLayout(hl7);
-
-        hl5 = new QHBoxLayout();
-        hl5->setObjectName(QStringLiteral("hl5"));
-        hl5->setContentsMargins(0, 0, 0, 0);
         label_5 = new QLabel(centralwidget);
         label_5->setObjectName(QStringLiteral("label_5"));
         QFont font1;
