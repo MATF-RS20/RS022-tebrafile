@@ -222,9 +222,9 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
                     [](auto acc, auto elem) {
                         return qMakePair<qint64, qint64>(acc.first+elem.first, acc.second+elem.second);
                     });
-    ui->uploadProgressBar->setValue(100*currentProgress.first / currentProgress.second);
+    ui->uploadProgressBar->setValue(static_cast<int>(100*currentProgress.first / currentProgress.second));
     if (currentProgress.first == currentProgress.second) {
-        ui->uploadProgressBar->setValue(100*done / total);
+        ui->uploadProgressBar->setValue(static_cast<int>(100*done / total));
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
@@ -240,9 +240,9 @@ void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
 
 QMutex MainWindow::downloadMutex;
 
-void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
+void MainWindow::downloadProgressBarSlot([[maybe_unused]]int id, qint64 done, qint64 total)
 {
-    ui->downloadProgressBar->setValue(100*done / total);
+    ui->downloadProgressBar->setValue(static_cast<int>(100*done / total));
     if (done == total) {
         serverConn->getClient()->cd(path);
         fileList->getTreeWidget()->setEnabled(true);

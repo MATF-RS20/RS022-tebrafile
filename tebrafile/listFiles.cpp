@@ -65,7 +65,7 @@ void ListFiles::addToList(const QUrlInfo& file)
         _treeWidget->setEnabled(true);
     }
 }
-void ListFiles::cdToFolder(QTreeWidgetItem *widgetItem, int column)
+void ListFiles::cdToFolder(QTreeWidgetItem *widgetItem, [[maybe_unused]]int column)
 {
     // ako je korisnik izabrao da ide nazad
     if(widgetItem == _treeWidget->topLevelItem(0) && !(_treeWidget->topLevelItem(0)->isDisabled())) {

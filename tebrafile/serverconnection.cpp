@@ -83,7 +83,7 @@ void ServerConnection::relogIn()
 
 
 
-void ServerConnection::loginHandler(int id, bool error)
+void ServerConnection::loginHandler(int id, [[maybe_unused]]bool error)
 {
     if (_client->state() == QFtp::LoggedIn and _loginId == id) {
         _logged = true;
@@ -92,7 +92,7 @@ void ServerConnection::loginHandler(int id, bool error)
     }
 }
 
-void ServerConnection::reloginHandler(int id, bool error)
+void ServerConnection::reloginHandler(int id, [[maybe_unused]]bool error)
 {
     if (_client->state() == QFtp::LoggedIn and _loginId == id) {
         _logged = true;
