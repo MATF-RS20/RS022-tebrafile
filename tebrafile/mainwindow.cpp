@@ -4,10 +4,6 @@
 
 #include <iostream>
 
-#include <QTreeView>
-#include <QHeaderView>
-#include <QDebug>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -47,7 +43,9 @@ void MainWindow::on_disconnectButton_clicked()
         _logger->consoleLog("Not connected.");
     else {
         _logger->consoleLog("You are disconnected.");
+        serverConn->setLogged(false);
         fileList->restartTreeWidget();
+        searchList->restartTreeWidget();
         fileList->clearPath();
     }
 }
@@ -58,7 +56,7 @@ void MainWindow::on_startButton_clicked()
         _logger->consoleLog("You must be connected.");
         return;
     } else if (!serverConn->isLogged()) {
-        _logger->consoleLog("You must be logged in.");
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
         return;
     }
     QString filename = ui->searchFile->text().trimmed();
@@ -93,14 +91,32 @@ void MainWindow::on_startButton_clicked()
 
 void MainWindow::searchDone()
 {
+    _logger->consoleLog("Search finished.\n" + QString::number(s->numOfFoundItems()) + " items found.");
     qDebug() << "done";
+}
+
+void MainWindow::on_searchWidget_clicked()
+{
+    ui->treeWidget->clearSelection();
+    const auto filenames = searchList->getTreeWidget()->selectedItems();
+    QStringList filenamesQ;
+
+    // ruzno ali radi
+    // fix sa refactorisanjem i std::transform
+    QString temp;
+    for(auto filename : filenames)
+    {
+        temp = filename->text(0);
+        filenamesQ.push_back(temp);
+    }
+
+    ui->downloadFileInput->setText(filenamesQ.join(';'));
 }
 
 void MainWindow::on_stopButton_clicked() {
     if(s != nullptr)
         s->stopSearch();
 }
-
 
 void MainWindow::on_openButton_clicked()
 {
@@ -136,7 +152,9 @@ void MainWindow::on_uploadButton_clicked()
 
 void MainWindow::on_downloadButton_clicked()
 {
-
+    path = fileList->getPath();
+    if (path.isEmpty())
+        path = "~";
 
     //negde mora ui->downloadButton->setEnabled(false);
 
@@ -151,7 +169,16 @@ void MainWindow::on_downloadButton_clicked()
     else {
         const auto fileNames = ui->downloadFileInput->text().split(";");
         std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
-            auto download = new Downloader(fileName, serverConn->getClient(), _logger);
+            auto name = fileName.right(fileName.length() - fileName.lastIndexOf('/'));
+            qDebug() << name;
+            auto currentPath = fileName.left(fileName.lastIndexOf('/'));
+            qDebug() << currentPath;
+            if (currentPath == fileName) {
+                currentPath = path + "/";
+            }
+
+            serverConn->getClient()->cd(currentPath);
+            auto download = new Downloader(name, serverConn->getClient(), _logger);
             loaders.push_back(download);
             download->start();
             QObject::connect(download, &Loader::signalProgress, this, &MainWindow::downloadProgressBarSlot);
@@ -164,6 +191,7 @@ void MainWindow::on_downloadButton_clicked()
 
 void MainWindow::on_treeWidget_clicked()
 {
+    ui->searchWidget->clearSelection();
     const auto filenames = fileList->getTreeWidget()->selectedItems();
     QStringList filenamesQ;
 
@@ -173,12 +201,12 @@ void MainWindow::on_treeWidget_clicked()
     for(auto filename : filenames)
     {
         temp = filename->text(0);
-        filenamesQ.push_back(temp);
+        if (fileList->isSelectedFile(temp)) {
+            filenamesQ.push_back(temp);
+        }
     }
 
-
     ui->downloadFileInput->setText(filenamesQ.join(';'));
-
 }
 
 QMutex MainWindow::uploadMutex;
@@ -216,10 +244,14 @@ void MainWindow::downloadProgressBarSlot(int id, qint64 done, qint64 total)
 {
     ui->downloadProgressBar->setValue(100*done / total);
     if (done == total) {
+        serverConn->getClient()->cd(path);
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                _logger->consoleLog(loader->getFileName() + " dowload is finished.");
+                auto name = loader->getFileName();
+                if (name.contains("/"))
+                    name = name.remove(0, 1);
+                _logger->consoleLog(name + " dowload is finished.");
                 loader->exit();
                 delete dynamic_cast<Downloader*>(loader);
             }

@@ -117,6 +117,7 @@ void ListFiles::restartTreeWidget()
     widgetItem->setText(0, "..");
     _treeWidget.data()->addTopLevelItem(widgetItem);
     _treeWidget->topLevelItem(0)->setDisabled(true);
+    _isDir.insert("..", true);
 
     // ctrl+click for multi-select
     _treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -157,4 +158,14 @@ QSharedPointer<QTreeWidget> ListFiles::getTreeWidget() const
 
 QSharedPointer<QHeaderView> ListFiles::getHeaderView() const{
     return _headerView;
+}
+
+QString ListFiles::getPath()
+{
+    return _currentPath;
+}
+
+bool ListFiles::isSelectedFile(QString name)
+{
+    return !_isDir.value(name);
 }

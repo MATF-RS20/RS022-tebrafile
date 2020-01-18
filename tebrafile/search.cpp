@@ -30,7 +30,7 @@ void Search::folderFinished(bool error)
             this->stopSearch();
             this->quit();
         }
-        qDebug() << _path;
+        //qDebug() << _path;
         if(!_folders.isEmpty())
             _path = _folders.takeFirst();
         //if(QDir(_path).exists())
@@ -62,3 +62,8 @@ void Search::stopSearch()
 }
 
 bool Search::isOngoing() { return _ongoing; }
+
+int Search::numOfFoundItems() const
+{
+    return _treeWidget->getTreeWidget()->topLevelItemCount() - 1;
+}

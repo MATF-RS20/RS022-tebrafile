@@ -25,6 +25,7 @@ public:
     void stopSearch();
     void addToList(const QUrlInfo& file);
     bool isOngoing();
+    int numOfFoundItems() const;
 
 private slots:
     void folderFinished(bool error);

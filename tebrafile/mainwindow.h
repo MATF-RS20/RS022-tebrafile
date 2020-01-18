@@ -24,6 +24,8 @@
 #include <QUrl>
 #include <QMutex>
 #include <QDebug>
+#include <QHeaderView>
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -52,6 +54,7 @@ private slots:
     void on_treeWidget_clicked();
     void on_startButton_clicked();
     void on_stopButton_clicked();
+    void on_searchWidget_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
 
@@ -71,6 +74,7 @@ private:
     QHash<int, QPair<qint64, qint64>> downloadData;
 
     QSharedPointer<Logger> _logger;
+    QString path;
 
     ListFiles *fileList = nullptr;
     ListFiles *searchList = nullptr;

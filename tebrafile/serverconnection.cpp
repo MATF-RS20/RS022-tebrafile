@@ -95,3 +95,7 @@ void ServerConnection::loginHandler(int id, bool error)
 QSharedPointer<InputDialog> ServerConnection::getDiag() const{
     return _diag;
 }
+
+void ServerConnection::setLogged(bool state) {
+    _logged = state;
+}
