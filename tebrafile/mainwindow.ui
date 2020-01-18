@@ -214,7 +214,7 @@
        <number>5</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="hl7">
+       <layout class="QHBoxLayout" name="hl5">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -245,22 +245,6 @@
         <item>
          <widget class="QLineEdit" name="searchFile"/>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="hl5">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
         <item>
          <widget class="QLabel" name="label_5">
           <property name="font">

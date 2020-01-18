@@ -27,6 +27,7 @@ public:
     bool isLogged() const;
     bool isConnected() const;
 
+
 private slots:
     void finishedHandler(int id, bool error);
     void loginHandler(int id, bool error);

@@ -158,3 +158,8 @@ QSharedPointer<QTreeWidget> ListFiles::getTreeWidget() const
 QSharedPointer<QHeaderView> ListFiles::getHeaderView() const{
     return _headerView;
 }
+
+QString ListFiles::getPath()
+{
+    return _currentPath;
+}

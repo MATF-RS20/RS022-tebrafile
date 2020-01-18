@@ -23,6 +23,7 @@ public:
     void leaveFolder();
     void restartTreeWidget();
     void clearPath();
+    QString getPath();
     QSharedPointer<QTreeWidget> getTreeWidget() const;
     QSharedPointer<QHeaderView> getHeaderView() const;
     void setServerConn(const QSharedPointer<QFtp>& serverConn);
