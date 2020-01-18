@@ -23,6 +23,7 @@ public:
     QSharedPointer<QFtp> getClient() const;
     QSharedPointer<Logger> getLogger() const;
     QSharedPointer<InputDialog> getDiag() const;
+    void setLogged(bool state);
 
     bool isLogged() const;
     bool isConnected() const;

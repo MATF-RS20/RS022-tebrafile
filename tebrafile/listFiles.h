@@ -26,6 +26,7 @@ public:
     QString getPath();
     QSharedPointer<QTreeWidget> getTreeWidget() const;
     QSharedPointer<QHeaderView> getHeaderView() const;
+    bool isSelectedFile(QString name);
     void setServerConn(const QSharedPointer<QFtp>& serverConn);
 
 private slots:

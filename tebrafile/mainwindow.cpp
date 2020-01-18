@@ -43,7 +43,9 @@ void MainWindow::on_disconnectButton_clicked()
         _logger->consoleLog("Not connected.");
     else {
         _logger->consoleLog("You are disconnected.");
+        serverConn->setLogged(false);
         fileList->restartTreeWidget();
+        searchList->restartTreeWidget();
         fileList->clearPath();
     }
 }
@@ -54,7 +56,7 @@ void MainWindow::on_startButton_clicked()
         _logger->consoleLog("You must be connected.");
         return;
     } else if (!serverConn->isLogged()) {
-        _logger->consoleLog("You must be logged in.");
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
         return;
     }
     QString filename = ui->searchFile->text().trimmed();
@@ -199,7 +201,9 @@ void MainWindow::on_treeWidget_clicked()
     for(auto filename : filenames)
     {
         temp = filename->text(0);
-        filenamesQ.push_back(temp);
+        if (fileList->isSelectedFile(temp)) {
+            filenamesQ.push_back(temp);
+        }
     }
 
     ui->downloadFileInput->setText(filenamesQ.join(';'));
