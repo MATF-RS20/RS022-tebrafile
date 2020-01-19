@@ -46,6 +46,17 @@ void ServerConnection::showLoginDialog()
 }
 
 
+QString ServerConnection::getUsername() const
+{
+    return _username;
+}
+
+
+QString ServerConnection::getPasswd() const
+{
+    return _password;
+}
+
 
 //Slots
 
@@ -67,8 +78,8 @@ void ServerConnection::logIn(InputDialog* diag)
     QStringList credentials = InputDialog::getStrings(diag);
     _loginId = _client->login(credentials.at(0), credentials.at(1));
 
-    username = credentials.at(0);
-    password = credentials.at(1);
+    _username = credentials.at(0);
+    _password = credentials.at(1);
 
     _diag = QSharedPointer<InputDialog>(diag);
     QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::loginHandler);
@@ -77,7 +88,7 @@ void ServerConnection::logIn(InputDialog* diag)
 void ServerConnection::relogIn()
 {
 
-        _loginId = _client->login(username, password);
+        _loginId = _client->login(_username, _password);
         QObject::connect(_client.data(), &QFtp::commandFinished, this, &ServerConnection::reloginHandler);
 }
 

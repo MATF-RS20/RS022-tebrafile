@@ -10,6 +10,7 @@ SearchDialog::SearchDialog(MainWindow* mainWindow, QWidget *parent) :
     _mainWindow(mainWindow)
 {
     ui->setupUi(this);
+    _searchList = new ListFiles(ui->searchWidget);
 }
 
 SearchDialog::~SearchDialog()
@@ -33,11 +34,13 @@ void SearchDialog::on_startButton_clicked()
     if (path.length() == 0) {
         path = QString("~");
     }
-
+    qDebug() << "36. linija okej";
     _mainWindow->getClient() = QSharedPointer<QFtp>(new QFtp(this));
+    qDebug() << "38. linija okej";
+    auto tmp = _mainWindow->getClient();
     _mainWindow->getClient()->connectToHost(QUrl(_mainWindow->getUI()->serverNameField->text()).host(), static_cast<quint16>(QUrl(_mainWindow->getUI()->serverNameField->text()).port(21)));
-    QStringList credentials = InputDialog::getStrings(_mainWindow->getConnection()->getDiag().data());
-    _mainWindow->getClient()->login(credentials.at(0), credentials.at(1));
+    _mainWindow->getClient()->login(_mainWindow->getConnection()->getUsername(), _mainWindow->getConnection()->getPasswd());
+
 
     if (_s == nullptr || !_s->isOngoing()) {
         _s = new Search(QSharedPointer<ListFiles>(_searchList), QSharedPointer<QRegularExpression>(re), path, _mainWindow->getClient());

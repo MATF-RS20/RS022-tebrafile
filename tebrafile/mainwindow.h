@@ -43,7 +43,7 @@ public:
     static QMutex downloadMutex;
 
 
-    QSharedPointer<QFtp> getClient();
+    QSharedPointer<QFtp>& getClient();
     QSharedPointer<Logger> getLogger();
     Ui::MainWindow* getUI();
     ServerConnection* getConnection();

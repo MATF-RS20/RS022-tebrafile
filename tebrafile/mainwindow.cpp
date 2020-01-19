@@ -21,7 +21,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QSharedPointer<QFtp> MainWindow::getClient()
+QSharedPointer<QFtp>& MainWindow::getClient()
 {
     return client;
 }

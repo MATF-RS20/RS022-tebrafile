@@ -25,6 +25,10 @@ public:
     QSharedPointer<QFtp> getClient() const;
     QSharedPointer<Logger> getLogger() const;
     QSharedPointer<InputDialog> getDiag() const;
+
+    QString getUsername() const;
+    QString getPasswd() const;
+
     void setLogged(bool state);
 
     bool isLogged() const;
@@ -50,8 +54,8 @@ private:
     int _loginId;
 
     QUrl _hostURL;
-    QString username;
-    QString password;
+    QString _username;
+    QString _password;
 
 
     bool _validURL = false;
