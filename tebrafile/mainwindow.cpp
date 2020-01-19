@@ -88,6 +88,9 @@ void MainWindow::on_uploadButton_clicked()
     else if (!serverConn->isConnected())
         Logger::showMessageBox("Alert", "You are not connected.", QMessageBox::Critical);
     else {
+        serverConn->getClient()->rawCommand("PWD");
+        QObject::connect(serverConn->getClient().data(), &QFtp::rawCommandReply,
+                             this, &MainWindow::pwdHandler);
         fileList->getTreeWidget()->setEnabled(false);
         const auto fileNames = ui->uploadFileInput->text().split(";");
         std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
@@ -122,9 +125,9 @@ void MainWindow::on_downloadButton_clicked()
         const auto fileNames = ui->downloadFileInput->text().split(";");
         std::for_each(std::begin(fileNames), std::end(fileNames), [&](const auto& fileName){
             auto name = fileName.right(fileName.length() - fileName.lastIndexOf('/'));
-            qDebug() << name;
+            // qDebug() << name;
             auto currentPath = fileName.left(fileName.lastIndexOf('/'));
-            qDebug() << currentPath;
+            // qDebug() << currentPath;
             if (currentPath == fileName) {
                 currentPath = path + "/";
             }
@@ -173,7 +176,7 @@ void MainWindow::uploadProgressBarSlot([[maybe_unused]]int id, qint64 done, qint
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                //_logger->consoleLog(loader->getFileName() + " upload is finished.");
+                _logger->consoleLog(loader->getFileName() + " upload is finished.");
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
@@ -207,6 +210,7 @@ void MainWindow::downloadProgressBarSlot([[maybe_unused]]int id, qint64 done, qi
 
 void MainWindow::uploadErrorHandler()
 {
+    serverConn->getClient()->rawCommand("PWD");
     for (auto loader : loaders)
         if (loader->isFinished()) {
             loader->exit();
@@ -268,4 +272,12 @@ void MainWindow::on_searchButton_clicked()
     }
     SearchDialog s(this);
     s.exec();
+}
+
+void MainWindow::pwdHandler([[maybe_unused]]int replyCode, [[maybe_unused]]const QString& detail)
+{
+    // qDebug() << "-----------------------";
+    // qDebug() << detail;
+    // qDebug() << "-----------------------";
+
 }

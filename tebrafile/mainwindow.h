@@ -59,7 +59,7 @@ private slots:
     void on_treeWidget_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
-
+    void pwdHandler(int replyCode, const QString& detail);
 
 
     void uploadErrorHandler();
