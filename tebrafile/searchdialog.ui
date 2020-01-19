@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
-    <height>309</height>
+    <width>639</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Search</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
@@ -56,7 +56,7 @@
           </font>
          </property>
          <property name="text">
-          <string>File name or regular expression:</string>
+          <string>Enter file name or regular expression:</string>
          </property>
         </widget>
        </item>

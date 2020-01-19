@@ -103,30 +103,6 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="hl2">
-      <item>
-       <widget class="QLineEdit" name="donwloadPath"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="searchButton">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>../icons/search.png</normaloff>../icons/search.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>20</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="hl4">
       <item>
        <widget class="QTreeWidget" name="treeWidget">
@@ -170,11 +146,15 @@
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="downloadFileInput">
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="hl2">
+      <item>
+       <widget class="QLineEdit" name="downloadFileInput">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QProgressBar" name="downloadProgressBar">
@@ -188,6 +168,23 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item>
+       <widget class="QPushButton" name="searchButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../icons/search.png</normaloff>../icons/search.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>20</height>
+         </size>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QPushButton" name="downloadButton">
         <property name="sizePolicy">
