@@ -1,0 +1,4 @@
+<map id="Loader" name="Loader">
+<area shape="rect" id="node3" href="$classDownloader.html" title="{Downloader\n||+ Downloader()\l+ run()\l+ ~Downloader()\l+ downloadProcessProgress()\l}" alt="" coords="5,329,203,451"/>
+<area shape="rect" id="node4" href="$classUploader.html" title="{Uploader\n||+ Uploader()\l+ run()\l+ ~Uploader()\l+ uploadProcessProgress()\l}" alt="" coords="227,329,407,451"/>
+</map>

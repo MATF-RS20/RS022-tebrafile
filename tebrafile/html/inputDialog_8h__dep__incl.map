@@ -1,0 +1,10 @@
+<map id="inputDialog.h" name="inputDialog.h">
+<area shape="rect" id="node2" href="$inputDialog_8cpp.html" title="inputDialog.cpp" alt="" coords="13,80,125,107"/>
+<area shape="rect" id="node3" href="$serverconnection_8h.html" title="serverconnection.h" alt="" coords="201,80,333,107"/>
+<area shape="rect" id="node4" href="$mainwindow_8h.html" title="mainwindow.h" alt="" coords="110,155,215,181"/>
+<area shape="rect" id="node9" href="$serverconnection_8cpp.html" title="serverconnection.cpp" alt="" coords="240,155,387,181"/>
+<area shape="rect" id="node5" href="$main_8cpp.html" title="main.cpp" alt="" coords="5,229,80,256"/>
+<area shape="rect" id="node6" href="$mainwindow_8cpp.html" title="mainwindow.cpp" alt="" coords="77,304,195,331"/>
+<area shape="rect" id="node7" href="$searchdialog_8h.html" title="searchdialog.h" alt="" coords="155,229,261,256"/>
+<area shape="rect" id="node8" href="$searchdialog_8cpp.html" title="searchdialog.cpp" alt="" coords="229,304,349,331"/>
+</map>

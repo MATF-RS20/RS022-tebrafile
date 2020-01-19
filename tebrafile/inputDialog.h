@@ -15,6 +15,10 @@
 
 #include <iostream>
 
+
+//Nadogradnja klase QDialog koja podržava n ulaza
+//
+//
 class InputDialog : public QDialog {
     Q_OBJECT
 public:

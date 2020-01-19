@@ -34,10 +34,7 @@ void SearchDialog::on_startButton_clicked()
     if (path.length() == 0) {
         path = QString("~");
     }
-    qDebug() << "36. linija okej";
     _mainWindow->getClient() = QSharedPointer<QFtp>(new QFtp(this));
-    qDebug() << "38. linija okej";
-    auto tmp = _mainWindow->getClient();
     _mainWindow->getClient()->connectToHost(QUrl(_mainWindow->getUI()->serverNameField->text()).host(), static_cast<quint16>(QUrl(_mainWindow->getUI()->serverNameField->text()).port(21)));
     _mainWindow->getClient()->login(_mainWindow->getConnection()->getUsername(), _mainWindow->getConnection()->getPasswd());
 
