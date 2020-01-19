@@ -42,6 +42,11 @@ public:
     static QMutex uploadMutex;
     static QMutex downloadMutex;
 
+
+    QSharedPointer<QFtp> getClient();
+    QSharedPointer<Logger> getLogger();
+    Ui::MainWindow* getUI();
+    ServerConnection* getConnection();
 public slots:
     void initTreeWidget();
 
@@ -52,34 +57,30 @@ private slots:
     void on_uploadButton_clicked();
     void on_downloadButton_clicked();
     void on_treeWidget_clicked();
-    void on_startButton_clicked();
-    void on_stopButton_clicked();
-    void on_searchWidget_clicked();
     void uploadProgressBarSlot(int id, qint64 done, qint64 total);
     void downloadProgressBarSlot(int id, qint64 done, qint64 total);
 
-    void searchDone();
+
 
     void uploadErrorHandler();
     void downloadErrorHandler();
 
     void on_downloadCancel_clicked();
 
+    void on_searchButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     ServerConnection* serverConn = nullptr;
 
     QVector<Loader*> loaders;
-    QHash<int, QPair<qint64, qint64>> uploadData;
-    QHash<int, QPair<qint64, qint64>> downloadData;
 
     QSharedPointer<Logger> _logger;
     QString path;
 
     ListFiles *fileList = nullptr;
-    ListFiles *searchList = nullptr;
 
-    Search *s = nullptr;
+
     QSharedPointer<QFtp> client;
 };
 #endif // MAINWINDOW_H

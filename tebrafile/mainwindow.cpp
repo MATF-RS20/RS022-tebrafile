@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "searchdialog.h"
 
 #include <iostream>
 
@@ -12,13 +12,33 @@ MainWindow::MainWindow(QWidget *parent)
     _logger = QSharedPointer<Logger>(new Logger(ui->textEdit));
 
     fileList = new ListFiles(ui->treeWidget);
-    searchList = new ListFiles(ui->searchWidget);
+    //searchList = new ListFiles(ui->searchWidget);
 }
 
 MainWindow::~MainWindow()
 {
     delete fileList;
     delete ui;
+}
+
+QSharedPointer<QFtp> MainWindow::getClient()
+{
+    return client;
+}
+
+QSharedPointer<Logger> MainWindow::getLogger()
+{
+    return _logger;
+}
+
+Ui::MainWindow* MainWindow::getUI()
+{
+   return ui;
+}
+
+ServerConnection* MainWindow::getConnection()
+{
+    return serverConn;
 }
 
 void MainWindow::on_connectButton_clicked()
@@ -45,77 +65,9 @@ void MainWindow::on_disconnectButton_clicked()
         _logger->consoleLog("You are disconnected.");
         serverConn->setLogged(false);
         fileList->restartTreeWidget();
-        searchList->restartTreeWidget();
+        //searchList->restartTreeWidget();
         fileList->clearPath();
     }
-}
-
-void MainWindow::on_startButton_clicked()
-{
-    if (nullptr == serverConn){
-        _logger->consoleLog("You must be connected.");
-        return;
-    } else if (!serverConn->isLogged()) {
-        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
-        return;
-    }
-    QString filename = ui->searchFile->text().trimmed();
-    if (filename.length() == 0) {
-        _logger->consoleLog("File name can't be empty string.");
-        return;
-    }
-    QRegularExpression *re = new QRegularExpression(filename);
-    if (!re->isValid()) {
-        _logger->consoleLog("Wrong regular expression.");
-        return;
-    }
-    QString path = ui->searchPath->text().trimmed();
-    if (path.length() == 0) {
-        path = QString("~");
-    }
-
-    client = QSharedPointer<QFtp>(new QFtp(this));
-    client->connectToHost(QUrl(ui->serverNameField->text()).host(), static_cast<quint16>(QUrl(ui->serverNameField->text()).port(21)));
-    QStringList credentials = InputDialog::getStrings(serverConn->getDiag().data());
-    client->login(credentials.at(0), credentials.at(1));
-
-    if (s == nullptr || !s->isOngoing()) {
-        s = new Search(QSharedPointer<ListFiles>(searchList), QSharedPointer<QRegularExpression>(re), path, client);
-        QObject::connect(s, &Search::searchFinished,
-                         this, &MainWindow::searchDone,
-                         Qt::QueuedConnection);
-        s->start();
-    }
-
-}
-
-void MainWindow::searchDone()
-{
-    _logger->consoleLog("Search finished.\n" + QString::number(s->numOfFoundItems()) + " items found.");
-    qDebug() << "done";
-}
-
-void MainWindow::on_searchWidget_clicked()
-{
-    ui->treeWidget->clearSelection();
-    const auto filenames = searchList->getTreeWidget()->selectedItems();
-    QStringList filenamesQ;
-
-    // ruzno ali radi
-    // fix sa refactorisanjem i std::transform
-    QString temp;
-    for(auto filename : filenames)
-    {
-        temp = filename->text(0);
-        filenamesQ.push_back(temp);
-    }
-
-    ui->downloadFileInput->setText(filenamesQ.join(';'));
-}
-
-void MainWindow::on_stopButton_clicked() {
-    if(s != nullptr)
-        s->stopSearch();
 }
 
 void MainWindow::on_openButton_clicked()
@@ -191,7 +143,7 @@ void MainWindow::on_downloadButton_clicked()
 
 void MainWindow::on_treeWidget_clicked()
 {
-    ui->searchWidget->clearSelection();
+    //ui->searchWidget->clearSelection();
     const auto filenames = fileList->getTreeWidget()->selectedItems();
     QStringList filenamesQ;
 
@@ -211,28 +163,21 @@ void MainWindow::on_treeWidget_clicked()
 
 QMutex MainWindow::uploadMutex;
 
-void MainWindow::uploadProgressBarSlot(int id, qint64 done, qint64 total)
+void MainWindow::uploadProgressBarSlot([[maybe_unused]]int id, qint64 done, qint64 total)
 {
     uploadMutex.lock();
-    uploadData[id] = qMakePair(done, total);
-    QPair<qint64, qint64> currentProgress = std::accumulate(
-                    std::begin(uploadData),
-                    std::end(uploadData),
-                    qMakePair<qint64, qint64>(0, 0),
-                    [](auto acc, auto elem) {
-                        return qMakePair<qint64, qint64>(acc.first+elem.first, acc.second+elem.second);
-                    });
-    ui->uploadProgressBar->setValue(static_cast<int>(100*currentProgress.first / currentProgress.second));
-    if (currentProgress.first == currentProgress.second) {
+
+    ui->uploadProgressBar->setValue(static_cast<int>(100* done / total));
+    if (done == total) {
         ui->uploadProgressBar->setValue(static_cast<int>(100*done / total));
         fileList->getTreeWidget()->setEnabled(true);
         for (auto loader : loaders)
             if (loader->isFinished()) {
-                _logger->consoleLog(loader->getFileName() + " upload is finished.");
+                //_logger->consoleLog(loader->getFileName() + " upload is finished.");
                 loader->exit();
                 delete dynamic_cast<Uploader*>(loader);
             }
-        uploadData.clear();
+
         loaders.clear();
     }
     uploadMutex.unlock();
@@ -255,7 +200,6 @@ void MainWindow::downloadProgressBarSlot([[maybe_unused]]int id, qint64 done, qi
                 loader->exit();
                 delete dynamic_cast<Downloader*>(loader);
             }
-        downloadData.clear();
         loaders.clear();
     }
     downloadMutex.unlock();
@@ -268,7 +212,7 @@ void MainWindow::uploadErrorHandler()
             loader->exit();
             delete dynamic_cast<Uploader*>(loader);
         }
-    uploadData.clear();
+
     loaders.clear();
     fileList->getTreeWidget()->setEnabled(true);
 }
@@ -280,7 +224,6 @@ void MainWindow::downloadErrorHandler()
             loader->exit();
             delete dynamic_cast<Downloader*>(loader);
         }
-    downloadData.clear();
     loaders.clear();
     fileList->getTreeWidget()->setEnabled(true);
 }
@@ -313,3 +256,16 @@ void MainWindow::on_downloadCancel_clicked()
 }
 
 
+
+void MainWindow::on_searchButton_clicked()
+{
+    if (nullptr == serverConn){
+        _logger->consoleLog("You must be connected.");
+        return;
+    } else if (!serverConn->isLogged()) {
+        Logger::showMessageBox("Alert", "You are not logged.", QMessageBox::Critical);
+        return;
+    }
+    SearchDialog s(this);
+    s.exec();
+}
