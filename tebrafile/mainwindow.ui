@@ -86,6 +86,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QPushButton" name="uploadCancel">
+      <property name="text">
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QProgressBar" name="uploadProgressBar">
       <property name="value">
        <number>0</number>

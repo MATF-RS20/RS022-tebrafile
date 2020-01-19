@@ -46,6 +46,7 @@ public:
     QHBoxLayout *hl1;
     QPushButton *openButton;
     QPushButton *uploadButton;
+    QPushButton *uploadCancel;
     QProgressBar *uploadProgressBar;
     QFrame *line;
     QHBoxLayout *hl2;
@@ -136,6 +137,11 @@ public:
 
 
         verticalLayout->addLayout(hl1);
+
+        uploadCancel = new QPushButton(centralwidget);
+        uploadCancel->setObjectName(QStringLiteral("uploadCancel"));
+
+        verticalLayout->addWidget(uploadCancel);
 
         uploadProgressBar = new QProgressBar(centralwidget);
         uploadProgressBar->setObjectName(QStringLiteral("uploadProgressBar"));
@@ -323,6 +329,7 @@ public:
         uploadFileInput->setText(QString());
         openButton->setText(QApplication::translate("MainWindow", "Open", Q_NULLPTR));
         uploadButton->setText(QApplication::translate("MainWindow", "Upload", Q_NULLPTR));
+        uploadCancel->setText(QApplication::translate("MainWindow", "Cancel", Q_NULLPTR));
         setFolderButton->setText(QApplication::translate("MainWindow", "Set Folder", Q_NULLPTR));
         label_3->setText(QApplication::translate("MainWindow", "Status:", Q_NULLPTR));
         label_2->setText(QApplication::translate("MainWindow", "Download file(s):", Q_NULLPTR));

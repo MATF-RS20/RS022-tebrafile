@@ -129,6 +129,8 @@ void MainWindow::on_openButton_clicked()
 
 void MainWindow::on_uploadButton_clicked()
 {
+    ui->uploadCancel->setEnabled(true);
+
     if (ui->uploadFileInput->text().trimmed().length() == 0)
         Logger::showMessageBox("Alert", "Files did not selected.", QMessageBox::Critical);
     else if (!serverConn->isLogged())
@@ -242,6 +244,7 @@ QMutex MainWindow::downloadMutex;
 
 void MainWindow::downloadProgressBarSlot([[maybe_unused]]int id, qint64 done, qint64 total)
 {
+    downloadMutex.lock();
     ui->downloadProgressBar->setValue(static_cast<int>(100*done / total));
     if (done == total) {
         serverConn->getClient()->cd(path);
@@ -312,4 +315,26 @@ void MainWindow::on_downloadCancel_clicked()
     ui->downloadCancel->setEnabled(false);
 }
 
+void MainWindow::on_uploadCancel_clicked()
+{
+    if(serverConn->getClient()->hasPendingCommands())
+        serverConn->getClient()->clearPendingCommands();
 
+    serverConn->getClient()->abort();
+
+    ui->uploadProgressBar->setValue(0);
+    loaders.clear();
+
+    const auto fileNames = ui->uploadFileInput->text().split(";");
+
+    for(auto fileName : fileNames)
+    {
+        _logger->consoleLog(fileName + ": Upload canceled.");
+    }
+
+    serverConn->getClient()->disconnect();
+    serverConn->relogIn();
+
+    ui->uploadCancel->setEnabled(false);
+    fileList->getTreeWidget()->setEnabled(true);
+}

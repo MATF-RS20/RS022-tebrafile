@@ -64,6 +64,7 @@ private slots:
     void downloadErrorHandler();
 
     void on_downloadCancel_clicked();
+    void on_uploadCancel_clicked();
 
 private:
     Ui::MainWindow *ui;
